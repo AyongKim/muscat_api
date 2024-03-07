@@ -8,10 +8,7 @@ from flask_restx import Api
 from flask_cors import CORS
 from flask_log_request_id import RequestID, RequestIDLogFilter
 
-from flaskapp.scheduled_jobs import background_scheduler
 
-# 스케줄링 job
-background_scheduler.start()
 
 app = Flask(__name__)
 

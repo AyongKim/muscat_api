@@ -6,7 +6,6 @@ import pymysql
 from flask import g
 
 from flaskapp.constants import *
-from flaskapp.enums import UserCode, LoginProvider, FailResponse
 
 
 def hashing_password(passwd):

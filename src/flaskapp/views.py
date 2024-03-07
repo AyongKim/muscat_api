@@ -16,12 +16,8 @@ from twilio.rest import TwilioException
 from flaskapp import app
 from flaskapp import utils
 from flaskapp import db_utils
-from flaskapp import es_utils
-from flaskapp import schedule
-from flaskapp.schedule import Scheduler
 from flaskapp.flask_namespaces import *
 from flaskapp.constants import *
-from flaskapp.enums import UserCode, FailResponse
 
 @UserNs.route('/Login')
 class Login(Resource):
