@@ -15,7 +15,8 @@ background_scheduler.start()
 
 app = Flask(__name__)
 
-CORS(app)
+CORS(app, origins=['localhost:3000'])
+#CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 # file size

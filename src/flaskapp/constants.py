@@ -1,7 +1,7 @@
 import os
 import boto3
 
-STAGE = os.environ.get('STAGE')
+STAGE = 'prod'
 PROD = 'prod'
 DEV = 'dev'
 if STAGE not in [PROD, DEV]:
@@ -45,12 +45,12 @@ H_M_FORMAT = '%H:%M'
 H_M_S_FORMATE = '%H:%M:%S'
 
 # ----- Database -----
-DB_USER = 'admin'
-DB_PASSWORD = _get_environment_value_of_stage('DB_PASSWORD')
-DB_ENDPOINT = _get_environment_value_of_stage('DB_ENDPOINT')
+DB_USER = 'root'
+DB_PASSWORD = ''
+DB_ENDPOINT = 'localhost'
 DB_PROT = 3306
 
-ALL_CLASS_DB = 'all_class_db'
+ALL_CLASS_DB = 'muscat'
 
 USER_TABLE = 'user'
 PASSWORD_TABLE = 'password'
