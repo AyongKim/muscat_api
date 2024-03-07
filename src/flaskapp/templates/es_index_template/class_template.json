@@ -1,0 +1,176 @@
+{
+  "order": 0,
+  "index_patterns": [
+    "class-*"
+  ],
+  "settings": {
+    "index": {
+      "number_of_shards": "1",
+      "number_of_replicas": "0",
+      "analysis": {
+        "analyzer": {
+          "ngram_analyzer": {
+            "type": "custom",
+            "tokenizer": "class_ngram"
+          }
+        },
+        "tokenizer": {
+          "class_ngram": {
+            "type": "ngram",
+            "min_gram": 2,
+            "max_gram": 2,
+            "token_chars": [
+              "letter",
+              "digit"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "end_date": {
+        "format": "yyyy-MM-dd",
+        "type": "date"
+      },
+      "description": {
+        "analyzer": "nori",
+        "type": "text"
+      },
+      "custom_schedule": {
+        "type": "nested",
+        "properties": {
+          "over_night": {
+            "type": "boolean"
+          },
+          "start": {
+            "format": "HH:mm",
+            "type": "date"
+          },
+          "week_day": {
+            "type": "byte"
+          },
+          "end": {
+            "format": "HH:mm",
+            "type": "date"
+          },
+          "year-month": {
+            "format": "yyyy-MM",
+            "type": "date"
+          },
+          "day": {
+            "type": "byte"
+          }
+        }
+      },
+      "regular_schedule": {
+        "type": "nested",
+        "properties": {
+          "over_night": {
+            "type": "boolean"
+          },
+          "start": {
+            "format": "HH:mm",
+            "type": "date"
+          },
+          "week_day": {
+            "type": "byte"
+          },
+          "end": {
+            "format": "HH:mm",
+            "type": "date"
+          }
+        }
+      },
+      "teacher_info": {
+        "properties": {
+          "teacher_name": {
+            "type": "keyword"
+          },
+          "teacher_id": {
+            "type": "keyword"
+          }
+        }
+      },
+      "subject_info": {
+        "type": "nested",
+        "properties": {
+          "subject_id": {
+            "type": "short"
+          },
+          "major_subject_id": {
+            "type": "short"
+          },
+          "major_subject_name": {
+            "type": "keyword"
+          },
+          "subject_name": {
+            "type": "keyword"
+          },
+          "grade": {
+            "type": "byte"
+          },
+          "school_course": {
+            "type": "keyword"
+          }
+        }
+      },
+      "academy_info": {
+        "properties": {
+          "academy_id": {
+            "type": "keyword"
+          },
+          "academy_name": {
+            "type": "keyword"
+          },
+          "address_tag": {
+            "type": "nested",
+            "properties": {
+              "address_tag_id": {
+                "type": "short"
+              },
+              "address_tag_name": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      },
+      "name": {
+        "analyzer": "ngram_analyzer",
+        "type": "text"
+      },
+      "closed": {
+        "type": "boolean"
+      },
+      "created_date": {
+        "format": "yyyy-MM-dd HH:mm",
+        "type": "date"
+      },
+      "start_date": {
+        "format": "yyyy-MM-dd",
+        "type": "date"
+      },
+      "tags": {
+        "properties": {
+          "user_added_tags": {
+            "type": "keyword"
+          },
+          "system_added_tags": {
+            "type": "nested",
+            "properties": {
+              "tag_name": {
+                "type": "keyword"
+              },
+              "tag_id": {
+                "type": "short"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "aliases": {}
+}

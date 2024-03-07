@@ -1,0 +1,88 @@
+{
+  "order": 0,
+  "index_patterns": [
+    "teacher"
+  ],
+  "settings": {
+    "index": {
+      "number_of_shards": "1",
+      "number_of_replicas": "0"
+    }
+  },
+  "mappings": {
+    "properties": {
+      "account_number": {
+        "type": "keyword"
+      },
+      "introduction": {
+        "analyzer": "nori",
+        "type": "text"
+      },
+      "description": {
+        "analyzer": "nori",
+        "type": "text"
+      },
+      "subject_info": {
+        "type": "nested",
+        "properties": {
+          "subject_id": {
+            "type": "short"
+          },
+          "major_subject_id": {
+            "type": "short"
+          },
+          "major_subject_name": {
+            "type": "keyword"
+          },
+          "subject_name": {
+            "type": "keyword"
+          },
+          "grade": {
+            "type": "byte"
+          },
+          "school_course": {
+            "type": "keyword"
+          }
+        }
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "class_count": {
+        "type": "integer"
+      },
+      "phone_number": {
+        "type": "keyword"
+      },
+      "belonged_academy_info": {
+        "properties": {
+          "academy_id": {
+            "type": "keyword"
+          },
+          "academy_name": {
+            "type": "keyword"
+          }
+        }
+      },
+      "tags": {
+        "properties": {
+          "user_added_tags": {
+            "type": "keyword"
+          },
+          "system_added_tags": {
+            "type": "nested",
+            "properties": {
+              "tag_id": {
+                "type": "short"
+              },
+              "tag_name": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "aliases": {}
+}

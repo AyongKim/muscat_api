@@ -1,0 +1,85 @@
+{
+  "order": 0,
+  "index_patterns": [
+    "schedule-*"
+  ],
+  "settings": {
+    "index": {
+      "number_of_shards": "1",
+      "number_of_replicas": "0"
+    }
+  },
+  "mappings": {
+    "properties": {
+      "custom_schedule": {
+        "type": "nested",
+        "properties": {
+          "request_type": {
+            "type": "keyword"
+          },
+          "schedule_id": {
+            "type": "keyword"
+          },
+          "start": {
+            "format": "HH:mm",
+            "type": "date"
+          },
+          "class_info": {
+            "properties": {
+              "teacher_info": {
+                "properties": {
+                  "teacher_name": {
+                    "type": "keyword"
+                  },
+                  "teacher_id": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "academy_info": {
+                "properties": {
+                  "academy_id": {
+                    "type": "keyword"
+                  },
+                  "academy_name": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "name": {
+                "type": "keyword"
+              },
+              "class_id": {
+                "type": "keyword"
+              }
+            }
+          },
+          "description": {
+            "type": "keyword"
+          },
+          "end": {
+            "format": "HH:mm",
+            "type": "date"
+          },
+          "over_night": {
+            "type": "boolean"
+          },
+          "day": {
+            "type": "short"
+          }
+        }
+      },
+      "regular_schedule": {
+        "properties": {
+          "class_id": {
+            "type": "keyword"
+          },
+          "user_class_id": {
+            "type": "keyword"
+          }
+        }
+      }
+    }
+  },
+  "aliases": {}
+}

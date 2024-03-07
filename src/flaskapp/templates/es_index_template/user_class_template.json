@@ -1,0 +1,91 @@
+{
+  "order": 0,
+  "index_patterns": [
+    "user-class-*"
+  ],
+  "settings": {
+    "index": {
+      "number_of_shards": "1",
+      "number_of_replicas": "0"
+    }
+  },
+  "mappings": {
+    "properties": {
+      "uid": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "keyword"
+      },
+      "created_date": {
+        "format": "yyyy-MM-dd HH:mm",
+        "type": "date"
+      },
+      "start_date": {
+        "format": "yyyy-MM-dd",
+        "type": "date"
+      },
+      "end_date": {
+        "format": "yyyy-MM-dd",
+        "type": "date"
+      },
+      "closed": {
+        "type": "boolean"
+      },
+      "regular_schedule": {
+        "type": "nested",
+        "properties": {
+          "week_day": {
+            "type": "byte"
+          },
+          "start": {
+            "format": "HH:mm",
+            "type": "date"
+          },
+          "end": {
+            "format": "HH:mm",
+            "type": "date"
+          },
+          "over_night": {
+            "type": "boolean"
+          }
+        }
+      },
+      "teacher_info": {
+        "properties": {
+          "teacher_name": {
+            "type": "keyword"
+          },
+          "teacher_id": {
+            "type": "keyword"
+          }
+        }
+      },
+      "academy_info": {
+        "properties": {
+          "academy_id": {
+            "type": "keyword"
+          },
+          "academy_name": {
+            "type": "keyword"
+          },
+          "address_tag": {
+            "type": "nested",
+            "properties": {
+              "address_tag_id": {
+                "type": "short"
+              },
+              "address_tag_name": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "aliases": {}
+}

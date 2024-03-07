@@ -1,0 +1,128 @@
+{
+  "order": 0,
+  "index_patterns": [
+    "academy-*"
+  ],
+  "settings": {
+    "index": {
+      "number_of_shards": "1",
+      "number_of_replicas": "0",
+      "analysis": {
+        "analyzer": {
+          "ngram_lowercase_analyzer": {
+            "type": "custom",
+            "tokenizer": "academy_ngram",
+            "filter": ["lowercase"]
+          }
+        },
+        "tokenizer": {
+          "academy_ngram": {
+            "type": "ngram",
+            "min_gram": 2,
+            "max_gram": 2,
+            "token_chars": [
+              "letter",
+              "digit"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "account_number": {
+        "type": "keyword"
+      },
+      "address_info": {
+        "properties": {
+          "address": {
+            "analyzer": "nori",
+            "type": "text"
+          },
+          "address_tag": {
+            "type": "nested",
+            "properties": {
+              "address_tag_id": {
+                "type": "short"
+              },
+              "address_tag_name": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      },
+      "subject_info": {
+        "type": "nested",
+        "properties": {
+          "major_subject_id": {
+            "type": "short"
+          },
+          "major_subject_name": {
+            "type": "keyword"
+          },
+          "subject_id": {
+            "type": "short"
+          },
+          "subject_name": {
+            "type": "keyword"
+          },
+          "grade": {
+            "type": "byte"
+          },
+          "school_course": {
+            "type": "keyword"
+          }
+        }
+      },
+      "homepage_url": {
+        "index": "false",
+        "type": "text"
+      },
+      "name": {
+        "analyzer": "ngram_lowercase_analyzer",
+        "type": "text"
+      },
+      "description": {
+        "analyzer": "nori",
+        "type": "text"
+      },
+      "class_count": {
+        "type": "integer"
+      },
+      "phone_number": {
+        "type": "keyword"
+      },
+      "teacher_info": {
+        "properties": {
+          "teacher_id": {
+            "type": "keyword"
+          },
+          "teacher_name": {
+            "type": "keyword"
+          }
+        }
+      },
+      "tags": {
+        "properties": {
+          "user_added_tags": {
+            "type": "keyword"
+          },
+          "system_added_tags": {
+            "type": "nested",
+            "properties": {
+              "tag_id": {
+                "type": "short"
+              },
+              "tag_name": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "aliases": {}
+}

@@ -1,0 +1,18 @@
+[Unit]
+Description=Allclass
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=on-failure
+
+ExecStartPre=-/usr/bin/docker pull 692924884361.dkr.ecr.ap-northeast-2.amazonaws.com/all-class-api-server:{{ stage }}
+ExecStartPre=-/usr/bin/docker stop all-class-api-server
+ExecStartPre=-/usr/bin/docker rm all-class-api-server
+
+ExecStart=/usr/bin/docker run --rm -p 1001:1001 -e STAGE={{ stage }} -e AWS_PROFILE=default -v /home/ubuntu/log/:/home/allclass/log -v /home/ubuntu/.aws/:/home/allclass/.aws:ro --name all-class-api-server 692924884361.dkr.ecr.ap-northeast-2.amazonaws.com/all-class-api-server:{{ stage }}
+
+ExecStop=/usr/bin/docker stop all-class-api-server
+
+[Install]
+WantedBy=multi-user.target
