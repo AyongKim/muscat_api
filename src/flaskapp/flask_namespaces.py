@@ -5,8 +5,9 @@ from flaskapp.swagger_type import *
 
 # ----- Namespace -----
 UserNs = Namespace('user', path='/user', description='유저의 register, login, pairing 등을 위한 API',decorators=[cross_origin()])
+CompanyNs = Namespace('company', path='/company', description='업체 API',decorators=[cross_origin()])
 
-namespaces = [UserNs]
+namespaces = [UserNs, CompanyNs]
 
 
 def _data_response_model(data_form, ns, model_name, list_form=False, data_key='data', sort_result=False):
@@ -26,12 +27,73 @@ success_response_form = {'result': success_field}
 fail_response_form = {'result': fail_field,
                       'reason': error_reason_field,
                       'error_message': error_message_field}
+success_response_model = UserNs.model('success_response_model', success_response_form)
+fail_response_model = UserNs.model('fail_response_model', fail_response_form)
 
 ## User
-get_academy_info_agree_form = {'get_academy_info': get_academy_info_flag}
-update_academy_info_agree_form = {'uid': uid_field, 'get_academy_info': get_academy_info_flag}
+user_login_request_form = {'email': fields.String('a@a.a'),
+                         'password': fields.String('password'),
+                         'code': fields.String()
+                         }
 
-user_token_info_form = {'uid': uid_field,
-                        'user_type': user_type_field,
-                        'nickname': nickname_field}
-user_token_info_model = UserNs.model('user_token_info', user_token_info_form)
+user_login_request_model = UserNs.model('user_login_request_model', user_login_request_form)
+
+user_login_data_form = {'userEmail': fields.String('a@a.a'),
+                         'userType': fields.Integer(1)}
+user_login_data_model = UserNs.model('data', user_login_data_form)
+
+user_login_response_form = {'loginResult': fields.Integer(1),
+                            'userData': fields.Nested(user_login_data_model)
+                            }
+
+user_login_response_model = UserNs.model('user_login_response_model', user_login_response_form)
+
+user_signup_request_form = {
+                        'user_type': fields.Integer(),#1:admin, 2:수탁사, 3: 위탁사
+                        'user_email': fields.String(description="asd"),
+                        'nickname': fields.String(),
+                        'user_password': fields.String(),
+                        'register_num': fields.String(),
+                        'company_address': fields.String(),
+                        'manager_name': fields.String(),
+                        'manager_phone': fields.String(),
+                        'manager_depart': fields.String(),
+                        'manager_grade': fields.String(),
+                        'other': fields.String(),
+                        'admin_name': fields.String(),
+                        'admin_phone': fields.String(),
+                        }
+
+user_signup_request_model = UserNs.model('user_signup_request_model', user_signup_request_form)
+
+user_update_request_form = {
+                        'user_id': fields.Integer(),
+                        'user_email': fields.String(),
+                        'user_password': fields.String(),
+                        'company_address': fields.String(),
+                        'manager_name': fields.String(),
+                        'manager_phone': fields.String(),
+                        'manager_depart': fields.String(),
+                        'manager_grade': fields.String(),
+                        'other': fields.String(),
+                        'admin_name': fields.String(),
+                        'admin_phone': fields.String(),
+                        'approval': fields.Integer(),
+                        }
+
+user_update_request_model = UserNs.model('user_update_request_model', user_update_request_form)
+
+company_register_request_form = {
+                        'register_num': fields.String(),
+                        'company_name': fields.String(),
+                        }
+
+company_register_request_model = CompanyNs.model('company_register_request_model', company_register_request_form)
+
+company_update_request_form = {
+                        'id': fields.Integer(),
+                        'register_num': fields.String(),
+                        'company_name': fields.String(),
+                        }
+
+company_update_request_model = CompanyNs.model('company_update_request_model', company_update_request_form)
