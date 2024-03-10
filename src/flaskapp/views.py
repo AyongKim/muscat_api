@@ -134,7 +134,7 @@ class CompanyRegister(Resource):
     @CompanyNs.response(200, 'SUCCESS', success_response_model)
     @CompanyNs.response(400, 'FAIL', fail_response_model)
     def post(self):
-        """등록"""
+        """업체 등록"""
         signup_data: dict = request.json
         result = db_utils.check_company_duplication(signup_data['register_num'])
 
@@ -163,7 +163,7 @@ class CompanyUpdate(Resource):
     @CompanyNs.response(200, 'SUCCESS', success_response_model)
     @CompanyNs.response(400, 'FAIL', fail_response_model)
     def post(self):
-        """수정"""
+        """업체 수정"""
         update_data: dict = request.json
         result = db_utils.check_company_duplication(update_data['register_num'])
 
@@ -195,5 +195,5 @@ class CompanyUpdate(Resource):
         result = db_utils.get_company_list()
 
         print(result)
-        data = [{'id': i[0], 'register_num': i[1], 'company': i[2]} for i in result]
+        data = [{'id': i[0], 'register_num': i[1], 'company_ㅜ믇': i[2]} for i in result]
         return data
