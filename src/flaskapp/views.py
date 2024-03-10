@@ -133,7 +133,7 @@ class UserList(Resource):
     @CompanyNs.response(200, 'SUCCESS', user_list_model)
     @CompanyNs.response(400, 'FAIL', fail_response_model)
     def post(self):
-        """업체 목록"""
+        """유저 목록"""
         result = db_utils.get_user_list()
 
         data = [{
@@ -299,3 +299,32 @@ class CompanyUpdate(Resource):
         db_utils.delete_company(delete_data['str_ids'])
 
         return SUCCESS_RESPONSE
+
+@ProjectNs.route('/Register')
+class CompanyRegister(Resource):
+    @ProjectNs.expect(company_register_request_model)
+    @ProjectNs.response(200, 'SUCCESS', success_response_model)
+    @CompanyNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """업체 등록"""
+        signup_data: dict = request.json
+        result = db_utils.check_company_duplication(signup_data['register_num'])
+
+        res = {}
+
+        if (result != None):
+            res['result'] = 'fail'
+            res['reason'] = 'Already Existing'
+            res['error_message'] = '번호가 중복됩니다.'
+            return res
+        
+        essential_keys = ['register_num', 'company_name']
+        check_response = utils.check_key_value_in_data_is_validate(data=signup_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        db_utils.register_company(signup_data)
+        res['result'] = 'success'
+        
+        return res

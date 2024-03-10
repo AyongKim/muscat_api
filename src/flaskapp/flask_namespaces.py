@@ -7,6 +7,7 @@ from flaskapp.swagger_type import *
 # ----- Namespace -----
 UserNs = Namespace('user', path='/user', description='유저의 register, login, pairing 등을 위한 API',decorators=[cross_origin()])
 CompanyNs = Namespace('company', path='/company', description='업체 API',decorators=[cross_origin()])
+ProjectNs = Namespace('project', path='/project', description='프로젝트 API',decorators=[cross_origin()])
 
 namespaces = [UserNs, CompanyNs]
 

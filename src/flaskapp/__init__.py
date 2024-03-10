@@ -12,7 +12,7 @@ from flask_log_request_id import RequestID, RequestIDLogFilter
 
 app = Flask(__name__)
 
-CORS(app, origins=['localhost:3000'])
+CORS(app)
 #CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
