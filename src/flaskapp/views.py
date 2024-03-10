@@ -158,8 +158,8 @@ class CompanyRegister(Resource):
         return res
 
 @CompanyNs.route('/Update')
-class CompanyRegister(Resource):
-    @CompanyNs.expect(company_update_request_model)
+class CompanyUpdate(Resource):
+    @CompanyNs.expect(company_data_model)
     @CompanyNs.response(200, 'SUCCESS', success_response_model)
     @CompanyNs.response(400, 'FAIL', fail_response_model)
     def post(self):
@@ -185,3 +185,15 @@ class CompanyRegister(Resource):
         res['result'] = 'success'
         
         return res
+    
+@CompanyNs.route('/List')
+class CompanyUpdate(Resource):
+    @CompanyNs.response(200, 'SUCCESS', success_response_model)
+    @CompanyNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """업체 목록"""
+        result = db_utils.get_company_list()
+
+        print(result)
+        data = [{'id': i[0], 'register_num': i[1], 'company': i[2]} for i in result]
+        return data

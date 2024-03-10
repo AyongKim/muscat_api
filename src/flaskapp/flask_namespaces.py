@@ -90,10 +90,16 @@ company_register_request_form = {
 
 company_register_request_model = CompanyNs.model('company_register_request_model', company_register_request_form)
 
-company_update_request_form = {
+company_data_form = {
                         'id': fields.Integer(),
                         'register_num': fields.String(),
                         'company_name': fields.String(),
                         }
 
-company_update_request_model = CompanyNs.model('company_update_request_model', company_update_request_form)
+company_data_model = CompanyNs.model('company_data_model', company_data_form)
+
+company_list_response_form = {
+                        'data': fields.List(fields.Nested(company_data_model))
+                        }
+
+company_list_response_model = CompanyNs.model('company_list_response_model', company_list_response_form)
