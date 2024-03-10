@@ -37,7 +37,6 @@ def execute_query(base_query: str, var_tuple: tuple):
 
     with database.cursor() as cursor:
         query = cursor.mogrify(base_query, var_tuple)
-        print(query)
         cursor.execute(query)
 
         # select 일때만 값 return

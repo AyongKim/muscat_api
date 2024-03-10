@@ -155,3 +155,10 @@ company_check_response_form = {
                     }
 
 company_check_response_model = UserNs.model('company_check_response_model', company_check_response_form)
+
+project_register_form = {
+                        'result': fields.String(),
+                        'company_name': fields.String()
+                    }
+
+company_check_response_model = UserNs.model('company_check_response_model', company_check_response_form)

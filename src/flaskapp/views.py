@@ -26,7 +26,6 @@ class Login(Resource):
     def post(self):
         """로그인"""
         login_data: dict = request.json
-        print(login_data)
         result = db_utils.check_login(login_data['email'], login_data['password'])
 
         res={}
@@ -249,7 +248,6 @@ class CompanyList(Resource):
         """업체 목록"""
         result = db_utils.get_company_list()
 
-        print(result)
         data = [{'id': i[0], 'register_num': i[1], 'company_name': i[2]} for i in result]
         return data
 
