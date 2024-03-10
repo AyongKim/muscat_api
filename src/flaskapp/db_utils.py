@@ -132,3 +132,8 @@ def get_company_list():
 
     data = execute_query(query, ())
     return data
+
+def delete_company(str_ids):
+    query = f'DELETE FROM {COMPANY_TABLE} WHERE id in ({str_ids})'
+
+    execute_query(query, ())

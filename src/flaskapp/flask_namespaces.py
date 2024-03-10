@@ -103,3 +103,9 @@ company_list_response_form = {
                         }
 
 company_list_response_model = CompanyNs.model('company_list_response_model', company_list_response_form)
+
+company_delete_form = {
+                        'str_ids': fields.String()
+                        }
+
+company_delete_model = CompanyNs.model('company_delete_model', company_delete_form)

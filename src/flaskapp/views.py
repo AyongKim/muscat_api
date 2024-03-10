@@ -195,5 +195,24 @@ class CompanyUpdate(Resource):
         result = db_utils.get_company_list()
 
         print(result)
-        data = [{'id': i[0], 'register_num': i[1], 'company_ㅜ믇': i[2]} for i in result]
+        data = [{'id': i[0], 'register_num': i[1], 'company_name': i[2]} for i in result]
         return data
+    
+@CompanyNs.route('/Delete')
+class CompanyUpdate(Resource):
+    @CompanyNs.expect(company_delete_model)
+    @CompanyNs.response(200, 'SUCCESS', success_response_model)
+    @CompanyNs.response(400, 'FAIL', fail_response_model)
+    def delete(self):
+        """업체 삭제"""
+        delete_data: dict = request.json
+
+        essential_keys = ['str_ids']
+        check_response = utils.check_key_value_in_data_is_validate(data=delete_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        db_utils.delete_company(delete_data['str_ids'])
+
+        return SUCCESS_RESPONSE
