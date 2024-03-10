@@ -1,5 +1,6 @@
 from flask_restx import Namespace, reqparse
 from flask_cors import cross_origin
+from flaskapp.constants import *
 
 from flaskapp.swagger_type import *
 
@@ -66,7 +67,7 @@ user_signup_request_form = {
 
 user_signup_request_model = UserNs.model('user_signup_request_model', user_signup_request_form)
 
-user_update_request_form = {
+user_update_form = {
                         'user_id': fields.Integer(),
                         'user_email': fields.String(),
                         'user_password': fields.String(),
@@ -81,7 +82,38 @@ user_update_request_form = {
                         'approval': fields.Integer(),
                         }
 
-user_update_request_model = UserNs.model('user_update_request_model', user_update_request_form)
+user_update_model = UserNs.model('user_update_model', user_update_form)
+
+user_check_id_form = {
+                        'id': fields.String()
+                    }
+
+user_check_id_model = UserNs.model('user_check_id_model', user_check_id_form)
+
+user_data_form = {
+                        'user_id': fields.Integer(),
+                        'user_email': fields.String(),
+                        'user_type': fields.Integer(),
+                        "register_num": fields.String(),
+                        'company_address': fields.String(),
+                        'manager_name': fields.String(),
+                        'manager_phone': fields.String(),
+                        'manager_depart': fields.String(),
+                        'manager_grade': fields.String(),
+                        'other': fields.String(),
+                        'approval': fields.Integer(),
+                        'id': fields.String(),
+                        'admin_name': fields.String(),
+                        'admin_phone': fields.String(),
+                        }
+
+user_data_model = UserNs.model('user_data_model', user_data_form)
+
+user_list_form = {
+    'data': fields.List(fields.Nested(user_data_model))
+}
+
+user_list_model = UserNs.model('user_list_model', user_list_form)
 
 company_register_request_form = {
                         'register_num': fields.String(),
@@ -109,3 +141,16 @@ company_delete_form = {
                         }
 
 company_delete_model = CompanyNs.model('company_delete_model', company_delete_form)
+
+company_check_form = {
+                        'register_num': fields.String()
+                    }
+
+company_check_model = UserNs.model('company_check_model', company_check_form)
+
+company_check_response_form = {
+                        'result': fields.String(),
+                        'company_name': fields.String()
+                    }
+
+company_check_response_model = UserNs.model('company_check_response_model', company_check_response_form)

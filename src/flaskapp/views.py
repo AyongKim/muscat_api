@@ -99,7 +99,7 @@ class Signup(Resource):
 
 @UserNs.route('/Update')
 class Update(Resource):
-    @UserNs.expect(user_update_request_model)
+    @UserNs.expect(user_update_model)
     @UserNs.response(200, 'SUCCESS', success_response_model)
     @UserNs.response(400, 'FAIL', fail_response_model)
     def post(self):
@@ -127,6 +127,61 @@ class Update(Resource):
         res['result'] = 'success'
         
         return res
+
+@UserNs.route('/List')
+class UserList(Resource):
+    @CompanyNs.response(200, 'SUCCESS', user_list_model)
+    @CompanyNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """업체 목록"""
+        result = db_utils.get_user_list()
+
+        data = [{
+                "user_id": x[0],
+                "user_email": x[1],
+                "user_type": x[3],
+                "register_num": x[5],
+                "company_address": x[6],
+                "manager_name": x[7],
+                "manager_phone": x[8],
+                "manager_depart": x[9],
+                "manager_grade": x[10],
+                "other": x[11],
+                "approval": x[12],
+                "id": x[13],
+                "admin_name": x[14],
+                "admin_phone": x[15],
+                
+            }
+        for x in result]
+            
+        return data
+
+@UserNs.route('/CheckId')
+class CheckId(Resource):
+    @UserNs.expect(user_check_id_model)
+    @UserNs.response(200, 'SUCCESS', success_response_model)
+    @UserNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """아이디중복확인"""
+        check_data: dict = request.json
+
+        essential_keys = ['id']
+        check_response = utils.check_key_value_in_data_is_validate(data=check_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        result = db_utils.user_check_id(check_data['id'])
+
+        res = {}
+        if (result != None):
+            res['result'] = 'fail'
+            res['reason'] = 'Already Existing'
+            res['error_message'] = '아이디가 중복됩니다.'
+            return res
+        
+        return SUCCESS_RESPONSE
 
 @CompanyNs.route('/Register')
 class CompanyRegister(Resource):
@@ -187,8 +242,8 @@ class CompanyUpdate(Resource):
         return res
     
 @CompanyNs.route('/List')
-class CompanyUpdate(Resource):
-    @CompanyNs.response(200, 'SUCCESS', success_response_model)
+class CompanyList(Resource):
+    @CompanyNs.response(200, 'SUCCESS', company_list_response_model)
     @CompanyNs.response(400, 'FAIL', fail_response_model)
     def post(self):
         """업체 목록"""
@@ -197,7 +252,35 @@ class CompanyUpdate(Resource):
         print(result)
         data = [{'id': i[0], 'register_num': i[1], 'company_name': i[2]} for i in result]
         return data
-    
+
+@CompanyNs.route('/Check')
+class CompanyCheck(Resource):
+    @UserNs.expect(company_check_model)
+    @UserNs.response(200, 'SUCCESS', company_check_response_model)
+    @UserNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """업체확인"""
+        check_data: dict = request.json
+
+        essential_keys = ['register_num']
+        check_response = utils.check_key_value_in_data_is_validate(data=check_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        result = db_utils.company_check(check_data['register_num'])
+
+        res = {}
+        if (result == None):
+            res['result'] = 'fail'
+            res['reason'] = 'None Existing'
+            res['error_message'] = '업체가 존재하지 않습니다.'
+            return res
+        
+        res['result'] = 'SUCCESS'
+        res['data'] = result[0]
+        return res
+        
 @CompanyNs.route('/Delete')
 class CompanyUpdate(Resource):
     @CompanyNs.expect(company_delete_model)

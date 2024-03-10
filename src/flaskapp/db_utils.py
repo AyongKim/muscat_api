@@ -98,6 +98,19 @@ def update_user(data):
         data_list.append(data['user_id'])
         execute_query(query, tuple(data_list))
 
+def user_check_id(id):
+    query = f'SELECT * FROM {USER_TABLE} ' \
+            f'WHERE check_id = %s'
+    
+    res = execute_query(query, (id))
+    return res[0] if res else None
+
+def get_user_list():
+    query = f'SELECT * FROM {USER_TABLE}'
+
+    data = execute_query(query, ())
+    return data
+
 def check_company_duplication(register_num):
     query = f'SELECT * FROM {COMPANY_TABLE} ' \
             f'WHERE register_num = %s'
@@ -137,3 +150,18 @@ def delete_company(str_ids):
     query = f'DELETE FROM {COMPANY_TABLE} WHERE id in ({str_ids})'
 
     execute_query(query, ())
+    
+def check_company(register_num):
+    query = f'SELECT * FROM {COMPANY_TABLE} ' \
+            f'WHERE register_num = %s'
+    
+    res = execute_query(query, (register_num))
+    return res[0] if res else None
+
+def company_check(register_num):
+    query = f'SELECT company_name FROM {COMPANY_TABLE} ' \
+            f'WHERE register_num = %s'
+    
+    res = execute_query(query, (register_num))
+    return res[0] if res else None
+
