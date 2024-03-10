@@ -130,8 +130,8 @@ class Update(Resource):
 
 @UserNs.route('/List')
 class UserList(Resource):
-    @CompanyNs.response(200, 'SUCCESS', user_list_model)
-    @CompanyNs.response(400, 'FAIL', fail_response_model)
+    @UserNs.response(200, 'SUCCESS', user_list_model)
+    @UserNs.response(400, 'FAIL', fail_response_model)
     def post(self):
         """유저 목록"""
         result = db_utils.get_user_list()
@@ -255,9 +255,9 @@ class CompanyList(Resource):
 
 @CompanyNs.route('/Check')
 class CompanyCheck(Resource):
-    @UserNs.expect(company_check_model)
-    @UserNs.response(200, 'SUCCESS', company_check_response_model)
-    @UserNs.response(400, 'FAIL', fail_response_model)
+    @CompanyNs.expect(company_check_model)
+    @CompanyNs.response(200, 'SUCCESS', company_check_response_model)
+    @CompanyNs.response(400, 'FAIL', fail_response_model)
     def post(self):
         """업체확인"""
         check_data: dict = request.json
@@ -304,7 +304,7 @@ class CompanyUpdate(Resource):
 class CompanyRegister(Resource):
     @ProjectNs.expect(company_register_request_model)
     @ProjectNs.response(200, 'SUCCESS', success_response_model)
-    @CompanyNs.response(400, 'FAIL', fail_response_model)
+    @ProjectNs.response(400, 'FAIL', fail_response_model)
     def post(self):
         """업체 등록"""
         signup_data: dict = request.json
