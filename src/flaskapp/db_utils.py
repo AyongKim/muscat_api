@@ -101,6 +101,11 @@ def update_user(data):
         data_list.append(data['user_id'])
         execute_query(query, tuple(data_list))
 
+def delete_user(str_ids):
+    query = f'DELETE FROM {USER_TABLE} WHERE user_id in ({str_ids})'
+
+    execute_query(query, ())
+
 def user_check_id(id):
     query = f'SELECT * FROM {USER_TABLE} ' \
             f'WHERE nickname = "{id}"'

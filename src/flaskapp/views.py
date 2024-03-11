@@ -159,6 +159,25 @@ class UserList(Resource):
             
         return data
 
+@UserNs.route('/Delete')
+class UserDelete(Resource):
+    @CompanyNs.expect(user_delete_model)
+    @CompanyNs.response(200, 'SUCCESS', success_response_model)
+    @CompanyNs.response(400, 'FAIL', fail_response_model)
+    def delete(self):
+        """유저 삭제"""
+        delete_data: dict = request.json
+
+        essential_keys = ['str_ids']
+        check_response = utils.check_key_value_in_data_is_validate(data=delete_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        db_utils.delete_user(delete_data['str_ids'])
+
+        return SUCCESS_RESPONSE
+
 @UserNs.route('/CheckId')
 class CheckId(Resource):
     @UserNs.expect(user_check_id_model)

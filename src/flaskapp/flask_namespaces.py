@@ -32,6 +32,9 @@ fail_response_form = {'result': fail_field,
 success_response_model = UserNs.model('success_response_model', success_response_form)
 fail_response_model = UserNs.model('fail_response_model', fail_response_form)
 
+delete_form = {
+            'str_ids': fields.String()
+            }
 ## User
 user_login_request_form = {'email': fields.String('a@a.a'),
                          'password': fields.String('password'),
@@ -117,6 +120,8 @@ user_list_form = {
 
 user_list_model = UserNs.model('user_list_model', user_list_form)
 
+user_delete_model = UserNs.model('user_delete_model', delete_form)
+
 company_register_request_form = {
                         'register_num': fields.String(),
                         'company_name': fields.String(),
@@ -138,11 +143,9 @@ company_list_response_form = {
 
 company_list_response_model = CompanyNs.model('company_list_response_model', company_list_response_form)
 
-company_delete_form = {
-                        'str_ids': fields.String()
-                        }
 
-company_delete_model = CompanyNs.model('company_delete_model', company_delete_form)
+
+company_delete_model = CompanyNs.model('company_delete_model', delete_form)
 
 company_check_form = {
                         'register_num': fields.String()
