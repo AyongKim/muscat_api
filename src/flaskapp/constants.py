@@ -8,7 +8,7 @@ H_M_S_FORMATE = '%H:%M:%S'
 # ----- Database -----
 DB_USER = 'admin'
 DB_PASSWORD = '63^4ExR2frHT'
-DB_ENDPOINT = 'muscat-dev.cro2kqu2go52.eu-north-1.rds.amazonaws.com'
+DB_ENDPOINT = 'database-1.cro2kqu2go52.eu-north-1.rds.amazonaws.com'
 DB_PROT = 3306
 
 ALL_CLASS_DB = 'muscat'

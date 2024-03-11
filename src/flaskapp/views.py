@@ -46,6 +46,7 @@ class Login(Resource):
                         update_data={}
                         update_data['user_id'] = result[4]
                         update_data['code'] = ''
+                        update_data['access_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                         db_utils.update_user(update_data)
                     else:
                         res['loginResult'] = 2
@@ -61,6 +62,7 @@ class Login(Resource):
                 update_data['user_id'] = result[4]
                 update_data['code'] = new_code
                 update_data['updated_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                update_data['access_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 db_utils.update_user(update_data)
 
                 utils.send_mail(result[0], '인증메일 발송', f'로그인을 위한 인증정보입니다.\n아래의 인증번호를 입력하여 인증을 완료해주세요.\n인증메일: {new_code} (유효시간: 3분)')
@@ -135,6 +137,7 @@ class UserList(Resource):
         """유저 목록"""
         result = db_utils.get_user_list()
 
+        print(result)
         data = [{
                 "user_id": x[0],
                 "user_email": x[1],
@@ -150,7 +153,7 @@ class UserList(Resource):
                 "id": x[13],
                 "admin_name": x[14],
                 "admin_phone": x[15],
-                
+                "access_time": x[18].strftime('%Y-%m-%d %H:%M:%S')
             }
         for x in result]
             

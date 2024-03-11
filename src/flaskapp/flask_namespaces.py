@@ -106,6 +106,7 @@ user_data_form = {
                         'id': fields.String(),
                         'admin_name': fields.String(),
                         'admin_phone': fields.String(),
+                        'access_time': fields.String(),
                         }
 
 user_data_model = UserNs.model('user_data_model', user_data_form)

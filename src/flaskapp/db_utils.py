@@ -92,7 +92,7 @@ def update_user(data):
     update_list = []
 
     for k, v in data.items():
-        if k in ['user_email', 'user_password', 'company_address', 'manager_name', 'manager_phone', 'manager_depart', 'manager_grade', 'other', 'approval', 'nickname', 'admin_name', 'admin_phone', 'code', 'updated_time']:
+        if k in ['user_email', 'user_password', 'company_address', 'manager_name', 'manager_phone', 'manager_depart', 'manager_grade', 'other', 'approval', 'nickname', 'admin_name', 'admin_phone', 'code', 'updated_time', 'access_time']:
             update_list.append(f'{k} = %s')
             data_list.append(str(v))
 
