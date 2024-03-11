@@ -40,7 +40,7 @@ def execute_query(base_query: str, var_tuple: tuple):
             query = base_query
         else:
             query = cursor.mogrify(base_query, var_tuple)
-            
+
         cursor.execute(query)
 
         # select 일때만 값 return
@@ -103,9 +103,9 @@ def update_user(data):
 
 def user_check_id(id):
     query = f'SELECT * FROM {USER_TABLE} ' \
-            f'WHERE nickname LIKE "%{id}%"'
+            f'WHERE nickname = "{id}"'
     
-    res = execute_query(query)
+    res = execute_query(query, ())
     return res[0] if res else None
 
 def get_user_list():
