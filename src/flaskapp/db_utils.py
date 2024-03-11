@@ -118,8 +118,8 @@ def check_company_duplication(register_num):
     return res[0] if res else None
 
 def register_company(data):
-    register_num = data['register_num'] if data['register_num'] else ''
-    company_name = data['company_name'] if data['company_name'] else ''
+    register_num = data['register_num']
+    company_name = data['company_name']
 
     query = f'INSERT INTO {COMPANY_TABLE} (register_num, company_name) '\
             f'VALUES (%s, %s)'
@@ -164,3 +164,41 @@ def company_check(register_num):
     res = execute_query(query, (register_num))
     return res[0] if res else None
 
+def register_project(data):
+    year = data['year']
+    name = data['name']
+    user_id = data['user_id']
+    checklist_id = data['checklist_id']
+    privacy_type = data['privacy_type']
+
+    today = datetime.now().strftime('%Y-%m-%d')
+    query = f'INSERT INTO {PROJECT_TABLE} (year, name, user_id, checklist_id, privacy_type, created_date, create_from, create_to, self_check_from, self_check_to, imp_check_from, imp_check_to) '\
+            f'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+    execute_query(query, (year, name, user_id, checklist_id, privacy_type, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), today, today, today, today, today, today))
+
+def update_project_schedule(data):
+    data_list = []
+    update_list = []
+
+    for k, v in data.items():
+        if k in ['create_from', 'create_to', 'self_check_from', 'self_check_to', 'imp_check_from', 'imp_check_to']:
+            update_list.append(f'{k} = %s')
+            data_list.append(str(v))
+
+    if update_list.__len__ != 0:
+        query = f'UPDATE {PROJECT_TABLE} SET {",".join(update_list)} WHERE id = %s'
+        data_list.append(data['id'])
+        execute_query(query, tuple(data_list))
+
+def get_project_schedule(id):
+    query = f'SELECT create_from, create_to, self_check_from, self_check_to, imp_check_from, imp_check_to FROM {PROJECT_TABLE} ' \
+            f'WHERE id = %s'
+    
+    res = execute_query(query, (id))
+    return res[0] if res else None
+
+def get_project_list():
+    query = f'SELECT id, year, name, user_id, checklist_id, privacy_type FROM {PROJECT_TABLE}'
+
+    data = execute_query(query, ())
+    return data

@@ -299,30 +299,94 @@ class CompanyUpdate(Resource):
         return SUCCESS_RESPONSE
 
 @ProjectNs.route('/Register')
-class CompanyRegister(Resource):
-    @ProjectNs.expect(company_register_request_model)
+class ProjectRegister(Resource):
+    @ProjectNs.expect(project_register_request_model)
     @ProjectNs.response(200, 'SUCCESS', success_response_model)
     @ProjectNs.response(400, 'FAIL', fail_response_model)
     def post(self):
-        """업체 등록"""
-        signup_data: dict = request.json
-        result = db_utils.check_company_duplication(signup_data['register_num'])
-
-        res = {}
-
-        if (result != None):
-            res['result'] = 'fail'
-            res['reason'] = 'Already Existing'
-            res['error_message'] = '번호가 중복됩니다.'
-            return res
+        """프로젝트 등록"""
+        register_data: dict = request.json
         
-        essential_keys = ['register_num', 'company_name']
-        check_response = utils.check_key_value_in_data_is_validate(data=signup_data, keys=essential_keys)
+        essential_keys = ['year', 'name', 'user_id', 'checklist_id', 'privacy_type']
+        check_response = utils.check_key_value_in_data_is_validate(data=register_data, keys=essential_keys)
 
         if check_response['result'] == FAIL_VALUE:
             return check_response
         
-        db_utils.register_company(signup_data)
-        res['result'] = 'success'
+        db_utils.register_project(register_data)
+        
+        return SUCCESS_RESPONSE
+
+@ProjectNs.route('/Schedule')
+class ProjectSchedule(Resource):
+    @ProjectNs.expect(project_set_schedule_request_model)
+    @ProjectNs.response(200, 'SUCCESS', success_response_model)
+    @ProjectNs.response(400, 'FAIL', fail_response_model)
+    def put(self):
+        """프로젝트 일정 설정"""
+        register_data: dict = request.json
+        
+        essential_keys = ['id', 'create_from', 'create_to', 'self_check_from', 'self_check_to', 'imp_check_from', 'imp_check_to']
+        check_response = utils.check_key_value_in_data_is_validate(data=register_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        db_utils.update_project_schedule(register_data)
+        
+        return SUCCESS_RESPONSE
+    
+    @ProjectNs.expect(project_get_schedule_request_model)
+    @ProjectNs.response(200, 'SUCCESS', success_response_model)
+    @ProjectNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """프로젝트 일정 조회"""
+        register_data: dict = request.json
+        
+        essential_keys = ['id']
+        check_response = utils.check_key_value_in_data_is_validate(data=register_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        res = {}
+        data = db_utils.get_project_schedule(register_data['id'])
+
+        if data == None:
+            res['result'] = 'fail'
+            res['reason'] = 'Non Existing'
+            res['error_message'] = '프로젝트가 존재하지 않습니다.'
+            return res
+        
+        x = data
+        res['data'] = {
+            'create_from': x[0].strftime('%Y-%m-%d'),
+            'create_to': x[1].strftime('%Y-%m-%d'),
+            'self_check_from': x[2].strftime('%Y-%m-%d'),
+            'self_check_to': x[3].strftime('%Y-%m-%d'),
+            'imp_check_from': x[4].strftime('%Y-%m-%d'),
+            'imp_check_to': x[5].strftime('%Y-%m-%d'),
+        }
+        res['result'] = 'SUCCESS'
         
         return res
+
+@ProjectNs.route('/List')
+class UserList(Resource):
+    @UserNs.response(200, 'SUCCESS', project_list_model)
+    @UserNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """프로젝트 목록"""
+        result = db_utils.get_project_list()
+
+        data = [{
+                'id': x[0], 
+                'year': x[1],
+                'name': x[2],
+                'user_id': x[3],
+                'checklist_id': x[4],
+                'privacy_type': x[5],
+            }
+        for x in result]
+            
+        return data

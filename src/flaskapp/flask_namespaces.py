@@ -9,7 +9,7 @@ UserNs = Namespace('user', path='/user', description='유저의 register, login,
 CompanyNs = Namespace('company', path='/company', description='업체 API',decorators=[cross_origin()])
 ProjectNs = Namespace('project', path='/project', description='프로젝트 API',decorators=[cross_origin()])
 
-namespaces = [UserNs, CompanyNs]
+namespaces = [UserNs, CompanyNs, ProjectNs]
 
 
 def _data_response_model(data_form, ns, model_name, list_form=False, data_key='data', sort_result=False):
@@ -161,4 +161,62 @@ project_register_form = {
                         'company_name': fields.String()
                     }
 
-company_check_response_model = UserNs.model('company_check_response_model', company_check_response_form)
+company_check_response_model = ProjectNs.model('company_check_response_model', company_check_response_form)
+
+project_register_request_form = {
+                        'year': fields.Integer(), 
+                        'name': fields.String(), 
+                        'user_id': fields.Integer(), 
+                        'checklist_id': fields.Integer(),
+                        'privacy_type': fields.Integer(),
+                        }
+
+project_register_request_model = ProjectNs.model('project_register_request_model', project_register_request_form)
+
+project_schedule_form = {
+            'create_from': fields.String(),
+            'create_to': fields.String(),
+            'self_check_from': fields.String(),
+            'self_check_to': fields.String(),
+            'imp_check_from': fields.String(),
+            'imp_check_to': fields.String(),
+}
+
+project_schedule_model = ProjectNs.model('project_schedule_model', project_schedule_form)
+
+project_set_schedule_request_form = {
+                        'id': fields.Integer(), 
+                        **project_schedule_form
+                        }
+
+project_set_schedule_request_model = ProjectNs.model('project_set_schedule_request_model', project_set_schedule_request_form)
+
+project_get_schedule_request_form = {
+                        'id': fields.Integer(), 
+                        }
+
+project_get_schedule_request_model = ProjectNs.model('project_get_schedule_request_model', project_get_schedule_request_form)
+
+project_get_schedule_response_form = {
+                        'result': fields.String(),
+                        'data': fields.Nested(project_schedule_model),
+                    }
+
+project_get_schedule_response_model = ProjectNs.model('project_get_schedule_response_model', project_get_schedule_response_form)
+
+project_data_form = {
+                        'id': fields.Integer(), 
+                        'year': fields.Integer(), 
+                        'name': fields.String(), 
+                        'user_id': fields.Integer(), 
+                        'checklist_id': fields.Integer(),
+                        'privacy_type': fields.Integer(),
+                    }
+
+project_data_model = ProjectNs.model('project_data_model', project_data_form)
+
+project_list_form = {
+    'data': fields.List(fields.Nested(project_data_model))
+}
+
+project_list_model = ProjectNs.model('project_list_model', project_list_form)
