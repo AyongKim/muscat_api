@@ -36,7 +36,11 @@ def execute_query(base_query: str, var_tuple: tuple):
     query_result = None
 
     with database.cursor() as cursor:
-        query = cursor.mogrify(base_query, var_tuple)
+        if var_tuple == ():
+            query = base_query
+        else:
+            query = cursor.mogrify(base_query, var_tuple)
+            
         cursor.execute(query)
 
         # select 일때만 값 return
@@ -99,9 +103,9 @@ def update_user(data):
 
 def user_check_id(id):
     query = f'SELECT * FROM {USER_TABLE} ' \
-            f'WHERE check_id = %s'
+            f'WHERE nickname LIKE "%{id}%"'
     
-    res = execute_query(query, (id))
+    res = execute_query(query)
     return res[0] if res else None
 
 def get_user_list():
