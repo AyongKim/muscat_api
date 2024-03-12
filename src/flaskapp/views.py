@@ -512,9 +512,10 @@ class NoticeList(Resource):
         data = [{
                 'id': x[0], 
                 'project_name': x[1] if x[1] != None else '전체',
-                'create_by': x[2],
-                'create_time': x[3].strftime('%Y-%m-%d %H:%M:%S'),
-                'views': x[4],
+                'title': x[2],
+                'create_by': x[3],
+                'create_time': x[4].strftime('%Y-%m-%d %H:%M:%S'),
+                'views': x[5],
             }
         for x in result]
             

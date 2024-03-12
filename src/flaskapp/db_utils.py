@@ -254,7 +254,7 @@ def update_notice(data):
         execute_query(query, tuple(data_list))
 
 def get_notice_list():
-    query = f'SELECT A.id, B.name, A.create_by, A.create_time, A.views FROM {NOTICE_TABLE} as A LEFT JOIN project as B ON A.project_id=B.id'
+    query = f'SELECT A.id, B.name, A.title, A.create_by, A.create_time, A.views FROM {NOTICE_TABLE} as A LEFT JOIN project as B ON A.project_id=B.id'
 
     data = execute_query(query, ())
     return data
