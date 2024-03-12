@@ -211,3 +211,48 @@ def get_project_list():
 
     data = execute_query(query, ())
     return data
+
+def register_notice(data):
+    project_id = data['project_id']
+    title = data['title']
+    content = data['content']
+    create_by = data['create_by']
+    create_time = data['create_time']
+    views = data['views']
+    attachment = data['attachment']
+
+    query = f'INSERT INTO {NOTICE_TABLE} (project_id, title, content, create_by, create_time, views, attachment) '\
+            f'VALUES (%s, %s, %s, %s, %s, %s, %s)'
+    execute_query(query, (project_id, title, content, create_by, create_time, views, attachment))
+    
+def get_notice_attachment(id):
+    query = f'SELECT create_time, attachment FROM {NOTICE_TABLE} ' \
+            f'WHERE id = %s'
+    
+    res = execute_query(query, (id))
+    return res[0] if res else None
+
+def update_notice(data):
+    data_list = []
+    update_list = []
+
+    for k, v in data.items():
+        if k in ['project_id', 'title', 'content', 'attachment']:
+            update_list.append(f'{k} = %s')
+            data_list.append(str(v))
+
+    if update_list.__len__ != 0:
+        query = f'UPDATE {PROJECT_TABLE} SET {",".join(update_list)} WHERE id = %s'
+        data_list.append(data['id'])
+        execute_query(query, tuple(data_list))
+
+def get_notice_list():
+    query = f'SELECT A.id, B.name, A.create_by, A.create_time, A.views FROM {NOTICE_TABLE} as A LEFT JOIN project as B ON A.project_id=B.id'
+
+    data = execute_query(query, ())
+    return data
+
+def delete_notice(str_ids):
+    query = f'DELETE FROM {NOTICE_TABLE} WHERE id in ({str_ids})'
+
+    execute_query(query, ())

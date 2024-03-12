@@ -8,8 +8,10 @@ from flaskapp.swagger_type import *
 UserNs = Namespace('user', path='/user', description='유저의 register, login, pairing 등을 위한 API',decorators=[cross_origin()])
 CompanyNs = Namespace('company', path='/company', description='업체 API',decorators=[cross_origin()])
 ProjectNs = Namespace('project', path='/project', description='프로젝트 API',decorators=[cross_origin()])
+NoticeNs = Namespace('notice', path='/notice', description='공지 API',decorators=[cross_origin()])
+CheckListNs = Namespace('checklist', path='/checklist', description='체크리스트 API',decorators=[cross_origin()])
 
-namespaces = [UserNs, CompanyNs, ProjectNs]
+namespaces = [UserNs, CompanyNs, ProjectNs, NoticeNs, CheckListNs]
 
 
 def _data_response_model(data_form, ns, model_name, list_form=False, data_key='data', sort_result=False):
@@ -224,3 +226,43 @@ project_list_form = {
 }
 
 project_list_model = ProjectNs.model('project_list_model', project_list_form)
+
+notice_register_request_form = {
+                        'project_id': fields.Integer(),
+                        'title': fields.String(),
+                        'content': fields.String(),
+                        'create_by': fields.String(),
+                        'file': fields.Raw()
+                        }
+
+notice_register_request_model = NoticeNs.model('notice_register_request_model', notice_register_request_form)
+
+notice_update_request_form = {
+                        'notice_id': fields.Integer(),
+                        'project_id': fields.Integer(),
+                        'title': fields.String(),
+                        'content': fields.String(),
+                        'change': fields.String(),
+                        'file': fields.Raw()
+                        }
+
+notice_update_request_model = NoticeNs.model('notice_update_request_model', notice_update_request_form)
+
+notice_data_form = {
+                        'id': fields.Integer(), 
+                        'project_name': fields.String(),
+                        'title': fields.String(),
+                        'create_by': fields.String(),
+                        'create_time': fields.String(),
+                        'views': fields.Integer()
+                    }
+
+notice_data_model = NoticeNs.model('notice_data_model', notice_data_form)
+
+notice_list_form = {
+    'data': fields.List(fields.Nested(notice_data_model))
+}
+
+notice_list_model = NoticeNs.model('notice_list_model', notice_list_form)
+
+notice_delete_model = NoticeNs.model('notice_delete_model', delete_form)

@@ -16,6 +16,7 @@ ALL_CLASS_DB = 'muscat'
 USER_TABLE = 'user'
 COMPANY_TABLE = 'company'
 PROJECT_TABLE = 'project'
+NOTICE_TABLE = 'notice'
 CHECKLIST_TABLE = 'checklist'
 
 NOT_MATCHED_VALUE = 'NOT_MATCHED'

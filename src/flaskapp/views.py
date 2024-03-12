@@ -4,11 +4,12 @@ import random
 import string
 import uuid
 import requests
+import os
 from datetime import datetime
 from pytz import timezone
 from werkzeug.exceptions import BadRequest
 
-from flask import request, g
+from flask import request, g, send_file
 from flask_restx import Resource
 from pymysql.err import Error
 from twilio.rest import TwilioException
@@ -18,6 +19,7 @@ from flaskapp import utils
 from flaskapp import db_utils
 from flaskapp.flask_namespaces import *
 from flaskapp.constants import *
+from flaskapp.enums import *
 
 @UserNs.route('/Login')
 class Login(Resource):
@@ -412,3 +414,122 @@ class UserList(Resource):
         for x in result]
             
         return data
+
+@NoticeNs.route('/Register')
+class NoticeRegister(Resource):
+    @NoticeNs.expect(notice_register_request_model)
+    @NoticeNs.response(200, 'SUCCESS', success_response_model)
+    @NoticeNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """공지 등록"""
+        register_data: dict = request.form.to_dict()
+
+        now = datetime.now()
+        timestamp = now.strftime('%Y%m%d%H%M%S')
+        register_data['attachment'] = ''
+
+        f = request.files['file'] 
+        if f.filename != '':
+            os.makedirs('upload/' + timestamp)
+            f.save('upload/' + timestamp + '/' + f.filename)
+            register_data['attachment'] = f.filename
+        
+        essential_keys = ['project_id', 'title', 'content', 'create_by']
+        check_response = utils.check_key_value_in_data_is_validate(data=register_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        register_data['create_time'] = now.strftime('%Y-%m-%d %H:%M:%S')
+        register_data['views'] = 0
+        db_utils.register_notice(register_data)
+        
+        return SUCCESS_RESPONSE
+
+@NoticeNs.route('/Update')
+class NoticeUpdate(Resource):
+    @NoticeNs.expect(notice_update_request_model)
+    @NoticeNs.response(200, 'SUCCESS', success_response_model)
+    @NoticeNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """공지 수정"""
+        update_data: dict = request.form.to_dict()
+
+        essential_keys = ['notice_id', 'project_id', 'title', 'content', 'change']
+        check_response = utils.check_key_value_in_data_is_validate(data=update_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        data = db_utils.get_notice_attachment(update_data['notice_id'])
+        if data == None:
+            return {'result': 'FAIL',
+                      'reason': 'Non existing Notice',
+                      'error_message': '공지가 존재하지 않습니다.'
+                      }
+
+        timestamp = data[0].strftime('%Y%m%d%H%M%S')
+
+        if update_data['change']:
+            update_data['attachment'] = ''
+
+            f = request.files['file'] 
+            if f.filename != '':
+                os.makedirs('upload/' + timestamp)
+                f.save('upload/' + timestamp + '/' + f.filename)
+                update_data['attachment'] = f.filename
+        
+        db_utils.update_notice(update_data)
+        
+        return SUCCESS_RESPONSE
+
+@NoticeNs.route('/Attachment')
+class NoticeAttachment(Resource):
+    def get(self):
+        """"""
+        id = request.args.get('id', '')
+
+        data = db_utils.get_notice_attachment(id)
+
+        if data != None and data[1] != '':
+            return send_file('../upload/'+data[0].strftime('%Y%m%d%H%M%S')+'/' + data[1], as_attachment=True)
+        
+        return 'Not exist'
+    
+@NoticeNs.route('/List')
+class NoticeList(Resource):
+    @NoticeNs.response(200, 'SUCCESS', notice_list_model)
+    @NoticeNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """프로젝트 목록"""
+        result = db_utils.get_notice_list()
+
+        data = [{
+                'id': x[0], 
+                'project_name': x[1] if x[1] != None else '전체',
+                'create_by': x[2],
+                'create_time': x[3].strftime('%Y-%m-%d %H:%M:%S'),
+                'views': x[4],
+            }
+        for x in result]
+            
+        return data
+
+@NoticeNs.route('/Delete')
+class NoticeDelete(Resource):
+    @NoticeNs.expect(notice_delete_model)
+    @NoticeNs.response(200, 'SUCCESS', success_response_model)
+    @NoticeNs.response(400, 'FAIL', fail_response_model)
+    def delete(self):
+        """업체 삭제"""
+        delete_data: dict = request.json
+
+        essential_keys = ['str_ids']
+        check_response = utils.check_key_value_in_data_is_validate(data=delete_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        db_utils.delete_notice(delete_data['str_ids'])
+
+        return SUCCESS_RESPONSE
