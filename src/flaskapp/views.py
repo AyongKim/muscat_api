@@ -516,6 +516,7 @@ class NoticeList(Resource):
                 'create_by': x[3],
                 'create_time': x[4].strftime('%Y-%m-%d %H:%M:%S'),
                 'views': x[5],
+                'attachment': x[6],
             }
         for x in result]
             

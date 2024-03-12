@@ -254,6 +254,7 @@ notice_data_form = {
                         'title': fields.String(),
                         'create_by': fields.String(),
                         'create_time': fields.String(),
+                        'attachment': fields.String(),
                         'views': fields.Integer()
                     }
 
