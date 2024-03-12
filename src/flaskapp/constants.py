@@ -7,11 +7,11 @@ H_M_S_FORMATE = '%H:%M:%S'
 
 # ----- Database -----
 DB_USER = 'admin'
-DB_PASSWORD = '63^4ExR2frHT'
-DB_ENDPOINT = 'database-1.cro2kqu2go52.eu-north-1.rds.amazonaws.com'
+DB_PASSWORD = '1q2w3e4r!'
+DB_ENDPOINT = 'all-class-db-dev.ckp8bphimfd6.ap-northeast-2.rds.amazonaws.com'
 DB_PROT = 3306
 
-ALL_CLASS_DB = 'muscat'
+ALL_CLASS_DB = 'user'
 
 USER_TABLE = 'user'
 COMPANY_TABLE = 'company'

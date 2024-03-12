@@ -190,7 +190,7 @@ def register_project(data):
     today = datetime.now().strftime('%Y-%m-%d')
     query = f'INSERT INTO {PROJECT_TABLE} (year, name, user_id, checklist_id, privacy_type, created_date, create_from, create_to, self_check_from, self_check_to, imp_check_from, imp_check_to) '\
             f'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
-    execute_query(query, (year, name, user_id, checklist_id, privacy_type, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), today, today, today, today, today, today))
+    return execute_query(query, (year, name, user_id, checklist_id, privacy_type, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), today, today, today, today, today, today))
 
 def update_project_schedule(data):
     data_list = []
@@ -230,7 +230,7 @@ def register_notice(data):
 
     query = f'INSERT INTO {NOTICE_TABLE} (project_id, title, content, create_by, create_time, views, attachment) '\
             f'VALUES (%s, %s, %s, %s, %s, %s, %s)'
-    execute_query(query, (project_id, title, content, create_by, create_time, views, attachment))
+    return execute_query(query, (project_id, title, content, create_by, create_time, views, attachment))
     
 def get_notice_attachment(id):
     query = f'SELECT create_time, attachment FROM {NOTICE_TABLE} ' \

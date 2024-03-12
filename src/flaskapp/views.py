@@ -337,9 +337,11 @@ class ProjectRegister(Resource):
         if check_response['result'] == FAIL_VALUE:
             return check_response
         
-        db_utils.register_project(register_data)
+        res = {}
+        res['id'] = db_utils.register_project(register_data)
+        res['result'] = SUCCESS_VALUE
         
-        return SUCCESS_RESPONSE
+        return res
 
 @ProjectNs.route('/Schedule')
 class ProjectSchedule(Resource):
@@ -442,9 +444,12 @@ class NoticeRegister(Resource):
         
         register_data['create_time'] = now.strftime('%Y-%m-%d %H:%M:%S')
         register_data['views'] = 0
-        db_utils.register_notice(register_data)
         
-        return SUCCESS_RESPONSE
+        res = {}
+        res['id'] = db_utils.register_notice(register_data)
+        res['result'] = SUCCESS_VALUE
+        
+        return res
 
 @NoticeNs.route('/Update')
 class NoticeUpdate(Resource):
