@@ -501,7 +501,7 @@ class NoticeList(Resource):
     @NoticeNs.response(200, 'SUCCESS', notice_list_model)
     @NoticeNs.response(400, 'FAIL', fail_response_model)
     def post(self):
-        """프로젝트 목록"""
+        """공지 목록"""
         result = db_utils.get_notice_list()
 
         data = [{
@@ -521,7 +521,7 @@ class NoticeDelete(Resource):
     @NoticeNs.response(200, 'SUCCESS', success_response_model)
     @NoticeNs.response(400, 'FAIL', fail_response_model)
     def delete(self):
-        """업체 삭제"""
+        """공지 삭제"""
         delete_data: dict = request.json
 
         essential_keys = ['str_ids']
