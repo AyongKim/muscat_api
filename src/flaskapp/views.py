@@ -95,7 +95,7 @@ class Signup(Resource):
         if check_response['result'] == FAIL_VALUE:
             return check_response
         
-        db_utils.register_user(signup_data)
+        res['id'] = db_utils.register_user(signup_data)
         res['result'] = 'success'
         
         return res
@@ -230,7 +230,7 @@ class CompanyRegister(Resource):
         if check_response['result'] == FAIL_VALUE:
             return check_response
         
-        db_utils.register_company(signup_data)
+        res['id'] = db_utils.register_company(signup_data)
         res['result'] = 'success'
         
         return res

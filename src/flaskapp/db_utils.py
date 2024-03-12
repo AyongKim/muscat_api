@@ -33,6 +33,7 @@ def get_db():
 def execute_query(base_query: str, var_tuple: tuple):
     database = get_db()
     return_flag = base_query.startswith('SELECT') or base_query.startswith('SHOW')
+    insert_flag = base_query.startswith('INSERT')
     query_result = None
 
     with database.cursor() as cursor:
@@ -43,13 +44,18 @@ def execute_query(base_query: str, var_tuple: tuple):
 
         cursor.execute(query)
 
+        insert_id = cursor.lastrowid
+
         # select 일때만 값 return
         if return_flag:
             query_result = cursor.fetchall()
         else:
             database.commit()
 
-        return query_result
+        if insert_flag:
+            return insert_id
+        else:
+            return query_result
 
 def check_login(email, password):
     password = hashing_password(password)
@@ -85,7 +91,8 @@ def register_user(data):
 
     query = f'INSERT INTO {USER_TABLE} (user_email, user_password, user_type, register_num, company_address, manager_name, manager_phone, manager_depart, manager_grade, other, approval, nickname, admin_name, admin_phone) '\
             f'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
-    execute_query(query, (user_email, user_password, user_type, register_num, company_address, manager_name, manager_phone, manager_depart, manager_grade, other, approval, nickname, admin_name, admin_phone))
+    
+    return execute_query(query, (user_email, user_password, user_type, register_num, company_address, manager_name, manager_phone, manager_depart, manager_grade, other, approval, nickname, admin_name, admin_phone))
 
 def update_user(data):
     data_list = []
@@ -132,7 +139,7 @@ def register_company(data):
 
     query = f'INSERT INTO {COMPANY_TABLE} (register_num, company_name) '\
             f'VALUES (%s, %s)'
-    execute_query(query, (register_num, company_name))
+    return execute_query(query, (register_num, company_name))
 
 def update_company(data):
     data_list = []
