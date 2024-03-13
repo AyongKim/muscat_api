@@ -269,8 +269,8 @@ def update_notice(data):
             data_list.append(str(v))
 
     if update_list.__len__ != 0:
-        query = f'UPDATE {PROJECT_TABLE} SET {",".join(update_list)} WHERE id = %s'
-        data_list.append(data['id'])
+        query = f'UPDATE {NOTICE_TABLE} SET {",".join(update_list)} WHERE id = %s'
+        data_list.append(data['notice_id'])
         execute_query(query, tuple(data_list))
 
 def get_notice_list():
