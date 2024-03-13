@@ -529,7 +529,8 @@ class NoticeUpdate(Resource):
 
             f = request.files['file'] 
             if f.filename != '':
-                os.makedirs('upload/' + timestamp)
+                if not os.path.exists('upload/' + timestamp):
+                    os.makedirs('upload/' + timestamp)
                 f.save('upload/' + timestamp + '/' + f.filename)
                 update_data['attachment'] = f.filename
         
