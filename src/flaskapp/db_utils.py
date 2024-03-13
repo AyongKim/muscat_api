@@ -19,7 +19,7 @@ def _connect_db():
         database=ALL_CLASS_DB,
         host=DB_ENDPOINT,
         port=DB_PROT,
-        charset='utf8'
+        charset='utf8mb4'
     )
     return conn
 

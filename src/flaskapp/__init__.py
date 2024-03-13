@@ -50,6 +50,8 @@ app.config['LOGGING_DIR'] = 'log'
 app.config['LOGGING_FILENAME'] = f'app-{time_format}.log'
 app.config['LOGGING_MAX_BYTES'] = 1024 * 1024
 app.config['LOGGING_BACKUP_COUNT'] = 100
+app.config['JSON_AS_ASCII'] = False
+
 RequestID(app)
 
 handler = logging.handlers.RotatingFileHandler(

@@ -20,6 +20,10 @@ from flaskapp import db_utils
 from flaskapp.flask_namespaces import *
 from flaskapp.constants import *
 from flaskapp.enums import *
+import html
+
+
+
 
 @UserNs.route('/Login')
 class Login(Resource):
@@ -471,8 +475,8 @@ class NoticeRegister(Resource):
         register_data['attachment'] = ''
 
         f = request.files['file'] 
-        print(f.filename.encode("utf-8").decode("iso-8859-1"))
-        f.filename = f.filename.encode("utf-8").decode("iso-8859-1")
+        f.filename = html.unescape(f.filename)
+        print(f.filename)
         if f.filename != '':
             os.makedirs('upload/' + timestamp)
             f.save('upload/' + timestamp + '/' + f.filename)
@@ -480,6 +484,9 @@ class NoticeRegister(Resource):
         
         essential_keys = ['project_id', 'title', 'content', 'create_by']
         check_response = utils.check_key_value_in_data_is_validate(data=register_data, keys=essential_keys)
+        register_data['title'] = html.unescape(register_data['title'])
+        register_data['content'] = html.unescape(register_data['content'])
+        register_data['create_by'] = html.unescape(register_data['create_by'])
 
         if check_response['result'] == FAIL_VALUE:
             return check_response
