@@ -10,8 +10,9 @@ CompanyNs = Namespace('company', path='/company', description='업체 API',decor
 ProjectNs = Namespace('project', path='/project', description='프로젝트 API',decorators=[cross_origin()])
 NoticeNs = Namespace('notice', path='/notice', description='공지 API',decorators=[cross_origin()])
 CheckListNs = Namespace('checklist', path='/checklist', description='체크리스트 API',decorators=[cross_origin()])
+InquiryNs = Namespace('inquiry', path='/inquiry', description='문의 API',decorators=[cross_origin()])
 
-namespaces = [UserNs, CompanyNs, ProjectNs, NoticeNs, CheckListNs]
+namespaces = [UserNs, CompanyNs, ProjectNs, NoticeNs, CheckListNs, InquiryNs]
 
 
 def _data_response_model(data_form, ns, model_name, list_form=False, data_key='data', sort_result=False):
@@ -290,3 +291,36 @@ notice_detail_request_form = {
                         'id': fields.Integer()
                     }
 notice_detail_request_model = NoticeNs.model('notice_detail_request_model', notice_detail_request_form)
+
+# 문의관련
+
+inquiry_register_request_form = {
+    'title': fields.String(),
+    'content': fields.String(),
+    'password': fields.String(),
+    'author': fields.String(),
+    'created_date': fields.String()
+}
+
+inquiry_register_request_model = InquiryNs.model('inquiry_register_request_model', inquiry_register_request_form)
+
+inquiry_data_form = {
+    'id': fields.Integer(),
+    'title': fields.String(),
+    'content': fields.String(),
+    'password': fields.String(),
+    'author': fields.String(),
+    'created_date': fields.String()
+}
+
+inquiry_data_model = InquiryNs.model('inquiry_data_model', inquiry_data_form)
+
+inquiry_list_form = {
+    'data': fields.List(fields.Nested(inquiry_data_model))
+}
+
+inquiry_list_model = InquiryNs.model('inquiry_list_model', inquiry_list_form)
+
+inquiry_delete_model = InquiryNs.model('inquiry_delete_model', delete_form)
+
+

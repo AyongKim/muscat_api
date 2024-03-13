@@ -623,3 +623,121 @@ class NoticeDelete(Resource):
         db_utils.delete_notice(delete_data['str_ids'])
 
         return SUCCESS_RESPONSE
+
+
+# 문의  
+
+@InquiryNs.route('/Register')
+class InquiryRegister(Resource):
+    @InquiryNs.expect(inquiry_register_request_model)
+    @InquiryNs.response(200, 'SUCCESS', success_response_model)
+    @InquiryNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """문의 등록"""
+        inquiry_data: dict = request.json
+        
+        essential_keys = ['title', 'content', 'password', 'author']
+        check_response = utils.check_key_value_in_data_is_validate(data=inquiry_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        inquiry_data['submit_date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        res = {}
+        res['id'] = db_utils.register_inquiry(inquiry_data)
+        res['result'] = SUCCESS_VALUE
+        
+        return res
+
+
+@InquiryNs.route('/List')
+class InquiryList(Resource):
+    @InquiryNs.response(200, 'SUCCESS', inquiry_list_model)
+    @InquiryNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """문의 목록 조회"""
+        result = db_utils.get_inquiry_list()
+
+        data = [{
+                'id': x[0], 
+                'title': x[1],
+                'content': x[2],
+                'password': x[3],
+                'author': x[4],
+                'submit_date': x[5].strftime('%Y-%m-%d %H:%M:%S'),
+                'status': x[6],
+            }
+        for x in result]
+            
+        return data
+
+@InquiryNs.route('/Delete')
+class InquiryDelete(Resource):
+    @InquiryNs.expect(inquiry_delete_model)
+    @InquiryNs.response(200, 'SUCCESS', success_response_model)
+    @InquiryNs.response(400, 'FAIL', fail_response_model)
+    def delete(self):
+        """문의 삭제"""
+        delete_data: dict = request.json
+
+        essential_keys = ['str_ids']
+        check_response = utils.check_key_value_in_data_is_validate(data=delete_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        db_utils.delete_inquiry(delete_data['str_ids'])
+
+        return SUCCESS_RESPONSE
+
+# @InquiryNs.route('/Detail')
+# class InquiryDetail(Resource):
+#     @InquiryNs.expect(inquiry_detail_request_model)
+#     @InquiryNs.response(200, 'SUCCESS', inquiry_detail_model)
+#     @InquiryNs.response(400, 'FAIL', fail_response_model)
+#     def post(self):
+#         """문의 상세정보 조회"""
+#         check_data: dict = request.json
+
+#         essential_keys = ['id']
+#         check_response = utils.check_key_value_in_data_is_validate(data=check_data, keys=essential_keys)
+
+#         if check_response['result'] == FAIL_VALUE:
+#             return check_response
+        
+#         result = db_utils.get_inquiry_detail(check_data['id'])
+
+#         if result != None:
+#             x = result
+#             data = {
+#                 'id': x[0], 
+#                 'title': x[1],
+#                 'content': x[2],
+#                 'password': x[3],
+#                 'author': x[4],
+#                 'submit_date': x[5].strftime('%Y-%m-%d %H:%M:%S'),
+#                 'status': x[6],
+#             }
+#             return data
+#         else:
+#             return FailResponse.NOT_EXISTING_INQUIRY
+
+# @InquiryNs.route('/UpdateStatus')
+# class InquiryUpdateStatus(Resource):
+#     @InquiryNs.expect(inquiry_update_status_request_model)
+#     @InquiryNs.response(200, 'SUCCESS', success_response_model)
+#     @InquiryNs.response(400, 'FAIL', fail_response_model)
+#     def post(self):
+#         """문의 상태 업데이트"""
+#         update_data: dict = request.json
+
+#         essential_keys = ['id', 'status']
+#         check_response = utils.check_key_value_in_data_is_validate(data=update_data, keys=essential_keys)
+
+#         if check_response['result'] == FAIL_VALUE:
+#             return check_response
+        
+#         db_utils.update_inquiry_status(update_data)
+        
+#         return SUCCESS_RESPONSE

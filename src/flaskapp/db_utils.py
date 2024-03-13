@@ -283,3 +283,26 @@ def delete_notice(str_ids):
     query = f'DELETE FROM {NOTICE_TABLE} WHERE id in ({str_ids})'
 
     execute_query(query, ())
+
+# 문의관련
+def register_inquiry(data):
+    title = data['title']
+    content = data['content']
+    password = hashing_password(data['password'])
+    author = data['author']
+    created_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    query = f'INSERT INTO {INQUIRY_TABLE} (title, content, password, author, created_date) '\
+            f'VALUES (%s, %s, %s, %s, %s)'
+    return execute_query(query, (title, content, password, author, created_date))
+
+def get_inquiry_list():
+    query = f'SELECT id, title, content, author, created_date FROM {INQUIRY_TABLE}'
+
+    data = execute_query(query, ())
+    return data
+
+def delete_inquiry(str_ids):
+    query = f'DELETE FROM {INQUIRY_TABLE} WHERE id in ({str_ids})'
+
+    execute_query(query, ())
