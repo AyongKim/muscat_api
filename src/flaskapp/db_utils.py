@@ -73,6 +73,13 @@ def check_duplication(email, nickname):
     res = execute_query(query, (email, nickname))
     return res[0] if res else None
 
+def check_email_duplication_with_id(email, id):
+    query = f'SELECT * FROM {USER_TABLE} ' \
+            f'WHERE user_email = %s AND user_id != %s '
+    
+    res = execute_query(query, (email, str(id)))
+    return res[0] if res else None
+
 def register_user(data):
     nickname = data['nickname']
     user_email = data['user_email']

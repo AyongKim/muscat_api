@@ -113,19 +113,19 @@ class Update(Resource):
         """수정"""
         update_data: dict = request.json
 
+        essential_keys = ['user_id']
+        check_response = utils.check_key_value_in_data_is_validate(data=update_data, keys=essential_keys)
+
         res = {}
 
         if 'user_email' in update_data:
-            result = db_utils.check_duplication(update_data['user_email'])
+            result = db_utils.check_email_duplication_with_id(update_data['user_email'], update_data['user_id'])
 
             if (result != None):
                 res['result'] = 'fail'
                 res['reason'] = 'Already Existing'
                 res['error_message'] = '이메일이 중복됩니다.'
                 return res
-        
-        essential_keys = ['user_id']
-        check_response = utils.check_key_value_in_data_is_validate(data=update_data, keys=essential_keys)
 
         if check_response['result'] == FAIL_VALUE:
             return check_response
