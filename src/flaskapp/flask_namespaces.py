@@ -273,6 +273,19 @@ notice_list_model = NoticeNs.model('notice_list_model', notice_list_form)
 
 notice_delete_model = NoticeNs.model('notice_delete_model', delete_form)
 
+notice_detail_form = {
+                        'id': fields.Integer(), 
+                        'project_name': fields.String(),
+                        'title': fields.String(),
+                        'content': fields.String(),
+                        'create_by': fields.String(),
+                        'create_time': fields.String(),
+                        'attachment': fields.String(),
+                        'views': fields.Integer()
+                    }
+
+notice_detail_model = NoticeNs.model('notice_detail_model', notice_detail_form)
+
 notice_detail_request_form = {
                         'id': fields.Integer()
                     }

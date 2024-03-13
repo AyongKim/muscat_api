@@ -574,7 +574,7 @@ class NoticeList(Resource):
 @NoticeNs.route('/Detail')
 class NoticeDetail(Resource):
     @NoticeNs.expect(notice_detail_request_model)
-    @NoticeNs.response(200, 'SUCCESS', notice_data_model)
+    @NoticeNs.response(200, 'SUCCESS', notice_detail_model)
     @NoticeNs.response(400, 'FAIL', fail_response_model)
     def post(self):
         """공지  상세정보"""
@@ -594,10 +594,11 @@ class NoticeDetail(Resource):
                 'id': x[0], 
                 'project_name': x[1] if x[1] != None else '전체',
                 'title': x[2],
-                'create_by': x[3],
-                'create_time': x[4].strftime('%Y-%m-%d %H:%M:%S'),
-                'views': x[5],
-                'attachment': x[6],
+                'content': x[3],
+                'create_by': x[4],
+                'create_time': x[5].strftime('%Y-%m-%d %H:%M:%S'),
+                'views': x[6],
+                'attachment': x[7],
             }
             return data
         else:
