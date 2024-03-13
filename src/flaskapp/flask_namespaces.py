@@ -96,6 +96,11 @@ user_check_id_form = {
 
 user_check_id_model = UserNs.model('user_check_id_model', user_check_id_form)
 
+user_detail_request_form = {
+                        'id': fields.Integer()
+                    }
+user_detail_request_model = UserNs.model('user_detail_request_model', user_detail_request_form)
+
 user_data_form = {
                         'user_id': fields.Integer(),
                         'user_email': fields.String(),
@@ -267,3 +272,8 @@ notice_list_form = {
 notice_list_model = NoticeNs.model('notice_list_model', notice_list_form)
 
 notice_delete_model = NoticeNs.model('notice_delete_model', delete_form)
+
+notice_detail_request_form = {
+                        'id': fields.Integer()
+                    }
+notice_detail_request_model = NoticeNs.model('notice_detail_request_model', notice_detail_request_form)

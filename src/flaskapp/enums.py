@@ -8,6 +8,7 @@ class FailResponse:
     INVALID_PASSWORD = dict({'reason': 'invalid_password'}, **FAIL_RESPONSE)
     REGISTERED_USER = dict({'reason': 'registered_user'}, **FAIL_RESPONSE)
     NOT_REGISTERED_USER = dict({'reason': 'not_registered_user'}, **FAIL_RESPONSE)
+    NOT_REGISTERED_NOTICE = dict({'reason': 'not_registered_notice'}, **FAIL_RESPONSE)
     INACTIVE_USER = dict({'reason': 'inactive_user'}, **FAIL_RESPONSE)
     UNVERIFIED_PHONE_NUMBER = dict({'reason': 'unverified_phone_number'}, **FAIL_RESPONSE)
     INVALID_TOKEN = dict({'reason': 'invalid_token'}, **FAIL_RESPONSE)

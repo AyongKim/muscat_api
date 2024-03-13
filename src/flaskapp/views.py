@@ -160,6 +160,46 @@ class UserList(Resource):
         for x in result]
             
         return data
+    
+@UserNs.route('/Detail')
+class UserDetail(Resource):
+    @UserNs.expect(user_detail_request_model)
+    @UserNs.response(200, 'SUCCESS', user_data_model)
+    @UserNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """유저 상세정보"""
+        check_data: dict = request.json
+
+        essential_keys = ['id']
+        check_response = utils.check_key_value_in_data_is_validate(data=check_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        result = db_utils.user_detail_by_id(check_data['id'])
+
+        if result != None:
+            x = result
+            data = {
+                    "user_id": x[0],
+                    "user_email": x[1],
+                    "user_type": x[3],
+                    "register_num": x[5],
+                    "company_address": x[6],
+                    "manager_name": x[7],
+                    "manager_phone": x[8],
+                    "manager_depart": x[9],
+                    "manager_grade": x[10],
+                    "other": x[11],
+                    "approval": x[12],
+                    "id": x[13],
+                    "admin_name": x[14],
+                    "admin_phone": x[15],
+                    "access_time": x[18].strftime('%Y-%m-%d %H:%M:%S')
+                }
+            return data
+        else:
+            return FailResponse.NOT_REGISTERED_USER
 
 @UserNs.route('/Delete')
 class UserDelete(Resource):
@@ -431,6 +471,8 @@ class NoticeRegister(Resource):
         register_data['attachment'] = ''
 
         f = request.files['file'] 
+        print(f.filename.encode("utf-8").decode("iso-8859-1"))
+        f.filename = f.filename.encode("utf-8").decode("iso-8859-1")
         if f.filename != '':
             os.makedirs('upload/' + timestamp)
             f.save('upload/' + timestamp + '/' + f.filename)
@@ -521,6 +563,38 @@ class NoticeList(Resource):
         for x in result]
             
         return data
+
+@NoticeNs.route('/Detail')
+class NoticeDetail(Resource):
+    @NoticeNs.expect(notice_detail_request_model)
+    @NoticeNs.response(200, 'SUCCESS', notice_data_model)
+    @NoticeNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """공지  상세정보"""
+        check_data: dict = request.json
+
+        essential_keys = ['id']
+        check_response = utils.check_key_value_in_data_is_validate(data=check_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        result = db_utils.notice_detail_by_id(check_data['id'])
+
+        if result != None:
+            x = result
+            data = {
+                'id': x[0], 
+                'project_name': x[1] if x[1] != None else '전체',
+                'title': x[2],
+                'create_by': x[3],
+                'create_time': x[4].strftime('%Y-%m-%d %H:%M:%S'),
+                'views': x[5],
+                'attachment': x[6],
+            }
+            return data
+        else:
+            return FailResponse.NOT_REGISTERED_NOTICE
 
 @NoticeNs.route('/Delete')
 class NoticeDelete(Resource):

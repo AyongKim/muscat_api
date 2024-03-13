@@ -113,6 +113,13 @@ def delete_user(str_ids):
 
     execute_query(query, ())
 
+def user_detail_by_id(id):
+    query = f'SELECT * FROM {USER_TABLE} ' \
+            f'WHERE user_id = "{id}"'
+    
+    res = execute_query(query, ())
+    return res[0] if res else None
+
 def user_check_id(id):
     query = f'SELECT * FROM {USER_TABLE} ' \
             f'WHERE nickname = "{id}"'
@@ -237,6 +244,12 @@ def get_notice_attachment(id):
             f'WHERE id = %s'
     
     res = execute_query(query, (id))
+    return res[0] if res else None
+
+def notice_detail_by_id(id):
+    query = f'SELECT A.id, B.name, A.title, A.create_by, A.create_time, A.views, A.attachment FROM {NOTICE_TABLE} as A LEFT JOIN project as B ON A.project_id=B.id WHERE A.id={id}'
+
+    res = execute_query(query, ())
     return res[0] if res else None
 
 def update_notice(data):
