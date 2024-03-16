@@ -288,6 +288,7 @@ def delete_notice(str_ids):
 def register_inquiry(data):
     title = data['title']
     content = data['content']
+    # password = hashing_password(data['password'])
     password = hashing_password(data['password'])
     author = data['author']
     created_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -297,7 +298,7 @@ def register_inquiry(data):
     return execute_query(query, (title, content, password, author, created_date))
 
 def get_inquiry_list():
-    query = f'SELECT id, title, content, author, created_date FROM {INQUIRY_TABLE}'
+    query = f'SELECT id, title, content,password, author, created_date FROM {INQUIRY_TABLE}'
 
     data = execute_query(query, ())
     return data

@@ -665,8 +665,7 @@ class InquiryList(Resource):
                 'content': x[2],
                 'password': x[3],
                 'author': x[4],
-                'submit_date': x[5].strftime('%Y-%m-%d %H:%M:%S'),
-                'status': x[6],
+                'created_date': x[5].strftime('%Y-%m-%d %H:%M:%S'), 
             }
         for x in result]
             
