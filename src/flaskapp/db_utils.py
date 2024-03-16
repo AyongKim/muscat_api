@@ -306,3 +306,77 @@ def delete_inquiry(str_ids):
     query = f'DELETE FROM {INQUIRY_TABLE} WHERE id in ({str_ids})'
 
     execute_query(query, ())
+
+
+#개인정보취급분류관리
+def register_personal_category(data):
+    personal_category = data['personal_category']
+    description = data['description']
+    
+    created_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    query = f'INSERT INTO {PERSONAL_CATEGORY_TABLE} (personal_category, description, created_date) '\
+            f'VALUES (%s, %s, %s)'
+    return execute_query(query, (personal_category, description, created_date))
+
+def get_personal_categories():
+    query = f'SELECT id, personal_category, description, created_date FROM {PERSONAL_CATEGORY_TABLE}'
+
+    data = execute_query(query, ())
+    return data
+
+def delete_personal_category(str_ids): 
+    query = f'DELETE FROM {PERSONAL_CATEGORY_TABLE} WHERE id in ({str_ids})'
+
+    execute_query(query, ())
+
+
+#개인정보항목관리
+def register_personal_info_item(data):
+    sequence = data['sequence']
+    standard_grade = data['standard_grade']
+    intermediate_grade = data['intermediate_grade']
+    item = data['item']
+    categoryId = data['categoryId']  # Added categoryId
+    merged1 = data['merged1']
+    merged2 = data['merged2']
+    
+    query = f'INSERT INTO {PERSONAL_INFO_TABLE} (sequence, standard_grade, intermediate_grade, item, categoryId, merged1, merged2) '\
+            f'VALUES (%s, %s, %s, %s, %s, %s, %s)'
+    return execute_query(query, (sequence, standard_grade, intermediate_grade, item, categoryId, merged1, merged2))
+
+def get_personal_info_items_list(category_id):
+    query = f'SELECT id, sequence, standard_grade, intermediate_grade, item, merged1, merged2 FROM {PERSONAL_INFO_TABLE} WHERE category_id = %s'
+    data = execute_query(query, (category_id,))
+    return data
+
+
+def delete_personal_info_item(id):
+    query = f'DELETE FROM {PERSONAL_INFO_TABLE} WHERE id = %s'
+
+    execute_query(query, (id,))
+
+
+
+
+#체크리스트관리
+def register_checklist_item(data):
+    checklist_item = data['checklist_item']
+    description = data['description']
+    
+    created_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    query = f'INSERT INTO {CHECKLIST_TABLE} (checklist_item, description, created_date) '\
+            f'VALUES (%s, %s, %s)'
+    return execute_query(query, (checklist_item, description, created_date))
+
+def get_checklist_items():
+    query = f'SELECT id, checklist_item, description, created_date FROM {CHECKLIST_TABLE}'
+
+    data = execute_query(query, ())
+    return data
+
+def delete_checklist_item(str_ids):
+    query = f'DELETE FROM {CHECKLIST_TABLE} WHERE id in ({str_ids})'
+
+    execute_query(query, ())

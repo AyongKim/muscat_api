@@ -9,10 +9,13 @@ UserNs = Namespace('user', path='/user', description='유저의 register, login,
 CompanyNs = Namespace('company', path='/company', description='업체 API',decorators=[cross_origin()])
 ProjectNs = Namespace('project', path='/project', description='프로젝트 API',decorators=[cross_origin()])
 NoticeNs = Namespace('notice', path='/notice', description='공지 API',decorators=[cross_origin()])
-CheckListNs = Namespace('checklist', path='/checklist', description='체크리스트 API',decorators=[cross_origin()])
 InquiryNs = Namespace('inquiry', path='/inquiry', description='문의 API',decorators=[cross_origin()])
+PersonalCategoryNs = Namespace('personal_category', path='/personal_category', description='개인정보취급분류 API',decorators=[cross_origin()])
+PersonalInfoNs = Namespace('personal_info', path='/personal_info', description='개인정보항목관리', decorators=[cross_origin()] )
+ChecklistNs = Namespace('checklist', path='/checklist', description='체크리스트 API',decorators=[cross_origin()])
 
-namespaces = [UserNs, CompanyNs, ProjectNs, NoticeNs, CheckListNs, InquiryNs]
+
+namespaces = [UserNs, CompanyNs, ProjectNs, NoticeNs, ChecklistNs, InquiryNs, PersonalCategoryNs, PersonalInfoNs]
 
 
 def _data_response_model(data_form, ns, model_name, list_form=False, data_key='data', sort_result=False):
@@ -323,4 +326,119 @@ inquiry_list_model = InquiryNs.model('inquiry_list_model', inquiry_list_form)
 
 inquiry_delete_model = InquiryNs.model('inquiry_delete_model', delete_form)
 
+#######################################333
+ # 개인정보 취급 분류 등록 모델
+personal_category_register_request_form = {
+    'handling_category': fields.String(required=True, description="개인정보 취급 분류"),
+    'description': fields.String(required=True, description="분류 설명"),
+}
 
+personal_category_register_model = PersonalCategoryNs.model('personal_category_register_request_model', personal_category_register_request_form)
+
+# 개인정보 취급 분류 데이터 모델
+personal_category_data_form = {
+    'id': fields.Integer(description="분류 ID"),
+    'handling_category': fields.String(description="개인정보 취급 분류"),
+    'description': fields.String(description="분류 설명"),
+    'created_date': fields.String(description="생성 날짜")
+}
+
+personal_category_data_model = PersonalCategoryNs.model('personal_category_data_model', personal_category_data_form)
+
+# 개인정보 취급 분류 목록 모델
+personal_category_list_form = {
+    'data': fields.List(fields.Nested(personal_category_data_model))
+}
+
+personal_category_list_model = PersonalCategoryNs.model('personal_category_list_model', personal_category_list_form)
+
+# 개인정보 취급 분류 삭제 모델
+personal_category_delete_form = {
+    'id': fields.Integer(required=True, description="삭제할 분류 ID")
+}
+
+personal_category_delete_model = PersonalCategoryNs.model('personal_category_delete_model', personal_category_delete_form)
+
+
+#####################################3333
+# 개인정보 항목 등록 모델
+personal_info_register_form = {
+    'sequence': fields.Integer(required=True, description="순서"),
+    'standard_grade': fields.String(required=True, description="기준 등급"),
+    'intermediate_grade': fields.String(required=True, description="중간 등급"),
+    'item': fields.String(required=True, description="항목 설명"),
+    'merged1': fields.Integer(required=True, description="합병 필드 1"),
+    'merged2': fields.Integer(required=True, description="합병 필드 2"),
+}
+
+personal_info_register_model = PersonalInfoNs.model('personal_info_register_model', personal_info_register_form)
+
+# 개인정보 항목 데이터 모델
+personal_info_data_form = {
+    'id': fields.Integer(description="항목 ID"),
+    'sequence': fields.Integer(description="순서"),
+    'standard_grade': fields.String(description="기준 등급"),
+    'intermediate_grade': fields.String(description="중간 등급"),
+    'item': fields.String(description="항목 설명"),
+    'merged1': fields.Integer(description="합병 필드 1"),
+    'merged2': fields.Integer(description="합병 필드 2"),
+}
+
+personal_info_data_model = PersonalInfoNs.model('personal_info_data_model', personal_info_data_form)
+
+# 개인정보 항목 목록 모델
+personal_info_list_form = {
+    'data': fields.List(fields.Nested(personal_info_data_model))
+}
+
+personal_info_list_model = PersonalInfoNs.model('personal_info_list_model', personal_info_list_form)
+
+
+# 카테고리 ID를 입력으로 받는 모델 정의
+personal_info_category_list_request_form = {
+    'category_id': fields.Integer(required=True, description="조회할 개인정보 항목의 카테고리 ID")
+}
+
+personal_info_category_list_request_model = PersonalInfoNs.model('personal_info_category_list_request_model', personal_info_category_list_request_form)
+
+# 개인정보 항목 삭제 모델
+personal_info_delete_form = {
+    'id': fields.Integer(required=True, description="삭제할 항목 ID")
+}
+
+personal_info_delete_model = PersonalInfoNs.model('personal_info_delete_model', personal_info_delete_form)
+
+
+
+####################################33
+# 체크리스트 등록 모델
+checklist_register_request_form = {
+    'checklist_item': fields.String(required=True, description="체크리스트 항목"),
+    'description': fields.String(required=True, description="항목 설명"),
+}
+
+checklist_register_model = ChecklistNs.model('checklist_register_request_model', checklist_register_request_form)
+
+# 체크리스트 데이터 모델
+checklist_data_form = {
+    'id': fields.Integer(description="항목 ID"),
+    'checklist_item': fields.String(description="체크리스트 항목"),
+    'description': fields.String(description="항목 설명"),
+    'created_date': fields.String(description="생성 날짜")
+}
+
+checklist_data_model = ChecklistNs.model('checklist_data_model', checklist_data_form)
+
+# 체크리스트 목록 모델
+checklist_list_form = {
+    'data': fields.List(fields.Nested(checklist_data_model))
+}
+
+checklist_list_model = ChecklistNs.model('checklist_list_model', checklist_list_form)
+
+# 체크리스트 삭제 모델
+checklist_delete_form = {
+    'id': fields.Integer(required=True, description="삭제할 항목 ID")
+}
+
+checklist_delete_model = ChecklistNs.model('checklist_delete_model', checklist_delete_form)

@@ -18,7 +18,12 @@ COMPANY_TABLE = 'company'
 PROJECT_TABLE = 'project'
 NOTICE_TABLE = 'notice'
 CHECKLIST_TABLE = 'checklist'
+CHECKLIST_INFO_TABLE = 'personal_info'
 INQUIRY_TABLE = 'inquiry'
+PERSONAL_CATEGORY_TABLE = 'personal_category'
+PERSONAL_INFO_TABLE = 'personal_info'
+ 
+
 
 NOT_MATCHED_VALUE = 'NOT_MATCHED'
 MATCHED_VALUE = 'MATCHED'

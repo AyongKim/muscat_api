@@ -741,3 +741,185 @@ class InquiryDelete(Resource):
 #         db_utils.update_inquiry_status(update_data)
         
 #         return SUCCESS_RESPONSE
+
+
+ 
+
+
+#개인정보취급분류관리
+# Assuming inquiry_register_request_model and the others are adjusted or new models are defined for PersonalCategory
+@PersonalCategoryNs.route('/Register')
+class PersonalCategoryRegister(Resource):
+    @PersonalCategoryNs.expect(personal_category_register_model)  # Update this model according to your new schema
+    @PersonalCategoryNs.response(200, 'SUCCESS', success_response_model)
+    @PersonalCategoryNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """개인정보 취급 분류 등록"""
+        category_data: dict = request.json
+        
+        essential_keys = ['handling_category', 'description']
+        check_response = utils.check_key_value_in_data_is_validate(data=category_data, keys=essential_keys)
+
+        if check_response['result'] == 'FAIL':
+            return check_response
+        
+        category_data['created_date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        res = {}
+        res['id'] = db_utils.register_personal_category(category_data)
+        res['result'] = 'SUCCESS'
+        
+        return res
+
+
+@PersonalCategoryNs.route('/List')
+class PersonalCategoryList(Resource):
+    @PersonalCategoryNs.response(200, 'SUCCESS', personal_category_list_model)  # Update or define this model
+    @PersonalCategoryNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """개인정보 취급 분류 목록 조회"""
+        result = db_utils.get_personal_category_list()
+
+        data = [{
+                'id': x[0], 
+                'handling_category': x[1],
+                'description': x[2],
+                'created_date': x[3].strftime('%Y-%m-%d %H:%M:%S'),
+            }
+        for x in result]
+            
+        return data
+
+
+@PersonalCategoryNs.route('/Delete')
+class PersonalCategoryDelete(Resource):
+    @PersonalCategoryNs.expect(personal_category_delete_model)  # Define or update this model
+    @PersonalCategoryNs.response(200, 'SUCCESS', success_response_model)
+    @PersonalCategoryNs.response(400, 'FAIL', fail_response_model)
+    def delete(self):
+        """개인정보 취급 분류 삭제"""
+        delete_data: dict = request.json
+
+        essential_keys = ['id']
+        check_response = utils.check_key_value_in_data_is_validate(data=delete_data, keys=essential_keys)
+
+        if check_response['result'] == 'FAIL':
+            return check_response
+        
+        db_utils.delete_personal_category(delete_data['id'])
+
+        return {'result': 'SUCCESS'}
+
+
+#개인정보항목관리
+@PersonalInfoNs.route('/Register')
+class PersonalInfoRegister(Resource):
+    @PersonalInfoNs.expect(personal_info_register_model)
+    @PersonalInfoNs.response(200, '성공', success_response_model)
+    @PersonalInfoNs.response(400, '실패', fail_response_model)
+    def post(self):
+        """새로운 개인정보 항목 등록"""
+        item_data = request.json
+        
+        # 유효성 검사 로직
+        필수_키 = ['sequence', 'standard_grade', 'intermediate_grade', 'item', 'merged1', 'merged2']
+        검사_결과 = utils.check_key_value_in_data_is_validate(data=item_data, keys=필수_키)
+
+        if 검사_결과['result'] == 'FAIL':
+            return 검사_결과
+        
+        # 현재 날짜 및 시간 사용
+        item_data['created_date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        결과 = db_utils.register_personal_info_item(item_data)
+        return {'id': 결과, 'result': '성공'}
+
+@PersonalInfoNs.route('/List')
+class PersonalInfoListByCategory(Resource):
+    @PersonalInfoNs.expect(personal_info_category_list_request_model)
+    @PersonalInfoNs.response(200, '성공', personal_info_list_model)
+    @PersonalInfoNs.response(400, '실패')
+    def post(self):
+        """카테고리 ID에 의한 개인정보 항목 목록 조회"""
+        request_data = request.json
+        category_id = request_data.get('category_id')
+        
+        # 카테고리 ID를 이용한 개인정보 항목 목록 조회
+        결과 = db_utils.get_personal_info_items_list(category_id)
+        
+        if 결과 is None or len(결과) == 0:
+            return {'message': '해당 카테고리에 개인정보 항목이 없습니다.'}, 404
+        
+        return {'data': 결과}
+
+@PersonalInfoNs.route('/Delete')
+class PersonalInfoDelete(Resource):
+    @PersonalInfoNs.expect(personal_info_delete_model)
+    @PersonalInfoNs.response(200, '성공')
+    def delete(self):
+        """ID를 이용한 개인정보 항목 삭제"""
+        삭제_데이터 = request.json
+        db_utils.delete_personal_info_item(삭제_데이터['id'])
+        return {'result': '성공'}
+
+
+
+
+#체크리스트관리
+@ChecklistNs.route('/Register')
+class ChecklistRegister(Resource):
+    @ChecklistNs.expect(checklist_register_model)  # 이 모델을 새 스키마에 맞게 업데이트
+    @ChecklistNs.response(200, 'SUCCESS', success_response_model)
+    @ChecklistNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """체크리스트 항목 등록"""
+        checklist_data: dict = request.json
+        
+        essential_keys = ['checklist_item', 'description']
+        check_response = utils.check_key_value_in_data_is_validate(data=checklist_data, keys=essential_keys)
+
+        if check_response['result'] == 'FAIL':
+            return check_response
+        
+        checklist_data['created_date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        res = db_utils.register_checklist_item(checklist_data)
+        return {'id': res, 'result': 'SUCCESS'}
+
+
+@ChecklistNs.route('/List')
+class ChecklistList(Resource):
+    @ChecklistNs.response(200, 'SUCCESS', checklist_list_model)
+    def post(self):
+        """체크리스트 항목 목록 조회"""
+        result = db_utils.get_checklist_items()
+
+        data = [{
+                'id': x[0], 
+                'checklist_item': x[1],
+                'description': x[2],
+                'created_date': x[3].strftime('%Y-%m-%d %H:%M:%S'),
+            }
+        for x in result]
+            
+        return data
+
+
+@ChecklistNs.route('/Delete')
+class ChecklistDelete(Resource):
+    @ChecklistNs.expect(checklist_delete_model)
+    @ChecklistNs.response(200, 'SUCCESS')
+    @ChecklistNs.response(400, 'FAIL')
+    def delete(self):
+        """체크리스트 항목 삭제"""
+        delete_data: dict = request.json
+
+        essential_keys = ['id']
+        check_response = utils.check_key_value_in_data_is_validate(data=delete_data, keys=essential_keys)
+
+        if check_response['result'] == 'FAIL':
+            return check_response
+        
+        db_utils.delete_checklist_item(delete_data['id'])
+
+        return {'result': 'SUCCESS'}
