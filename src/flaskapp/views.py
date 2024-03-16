@@ -756,7 +756,7 @@ class PersonalCategoryRegister(Resource):
         """개인정보 취급 분류 등록"""
         category_data: dict = request.json
         
-        essential_keys = ['handling_category', 'description']
+        essential_keys = ['personal_category', 'description']
         check_response = utils.check_key_value_in_data_is_validate(data=category_data, keys=essential_keys)
 
         if check_response['result'] == 'FAIL':
@@ -777,11 +777,11 @@ class PersonalCategoryList(Resource):
     @PersonalCategoryNs.response(400, 'FAIL', fail_response_model)
     def post(self):
         """개인정보 취급 분류 목록 조회"""
-        result = db_utils.get_personal_category_list()
+        result = db_utils.get_personal_categories()
 
         data = [{
                 'id': x[0], 
-                'handling_category': x[1],
+                'personal_category': x[1],
                 'description': x[2],
                 'created_date': x[3].strftime('%Y-%m-%d %H:%M:%S'),
             }

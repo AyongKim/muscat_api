@@ -329,7 +329,7 @@ inquiry_delete_model = InquiryNs.model('inquiry_delete_model', delete_form)
 #######################################333
  # 개인정보 취급 분류 등록 모델
 personal_category_register_request_form = {
-    'handling_category': fields.String(required=True, description="개인정보 취급 분류"),
+    'personal_category': fields.String(required=True, description="개인정보 취급 분류"),
     'description': fields.String(required=True, description="분류 설명"),
 }
 
@@ -338,7 +338,7 @@ personal_category_register_model = PersonalCategoryNs.model('personal_category_r
 # 개인정보 취급 분류 데이터 모델
 personal_category_data_form = {
     'id': fields.Integer(description="분류 ID"),
-    'handling_category': fields.String(description="개인정보 취급 분류"),
+    'personal_category': fields.String(description="개인정보 취급 분류"),
     'description': fields.String(description="분류 설명"),
     'created_date': fields.String(description="생성 날짜")
 }

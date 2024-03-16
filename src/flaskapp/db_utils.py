@@ -289,7 +289,7 @@ def register_inquiry(data):
     title = data['title']
     content = data['content']
     # password = hashing_password(data['password'])
-    password = hashing_password(data['password'])
+    password = (data['password'])
     author = data['author']
     created_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
