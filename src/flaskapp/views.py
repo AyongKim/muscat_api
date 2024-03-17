@@ -72,7 +72,7 @@ class Login(Resource):
                 db_utils.update_user(update_data)
 
                 utils.send_mail(result[0], '인증메일 발송', f'로그인을 위한 인증정보입니다.\n아래의 인증번호를 입력하여 인증을 완료해주세요.\n인증메일: {new_code} (유효시간: 3분)')
-            
+                
         return res
 
 @UserNs.route('/Signup')
@@ -83,7 +83,7 @@ class Signup(Resource):
     def post(self):
         """등록"""
         signup_data: dict = request.json
-        result = db_utils.check_duplication(signup_data['user_email'], signup_data['nickname'])
+        result = db_utils.check_duplication(signup_data['user_email'], signup_data['id'])
 
         res = {}
 
@@ -93,7 +93,7 @@ class Signup(Resource):
             res['error_message'] = '이메일 또는 아이디가 중복됩니다.'
             return res
         
-        essential_keys = ['user_email', 'user_password', 'nickname', 'user_type']
+        essential_keys = ['user_email', 'user_password', 'id', 'user_type']
         check_response = utils.check_key_value_in_data_is_validate(data=signup_data, keys=essential_keys)
 
         if check_response['result'] == FAIL_VALUE:
@@ -130,6 +130,10 @@ class Update(Resource):
         if check_response['result'] == FAIL_VALUE:
             return check_response
         
+        if 'user_password' in update_data:
+            if update_data['user_password'] == '':
+                update_data.pop('user_password')
+
         db_utils.update_user(update_data)
         res['result'] = 'success'
         
@@ -143,7 +147,6 @@ class UserList(Resource):
         """유저 목록"""
         result = db_utils.get_user_list()
 
-        print(result)
         data = [{
                 "user_id": x[0],
                 "user_email": x[1],
@@ -164,7 +167,37 @@ class UserList(Resource):
         for x in result]
             
         return data
-    
+
+@UserNs.route('/ApprovalList')
+class UserApprovalList(Resource):
+    @UserNs.response(200, 'SUCCESS', user_list_model)
+    @UserNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """승인신청유저 목록"""
+        result = db_utils.get_approval_user_list()
+
+        data = [{
+                "user_id": x[0],
+                "user_email": x[1],
+                "user_type": x[3],
+                "register_num": x[5],
+                "company_address": x[6],
+                "manager_name": x[7],
+                "manager_phone": x[8],
+                "manager_depart": x[9],
+                "manager_grade": x[10],
+                "other": x[11],
+                "approval": x[12],
+                "id": x[13],
+                "admin_name": x[14],
+                "admin_phone": x[15],
+                "access_time": x[18].strftime('%Y-%m-%d %H:%M:%S')
+            }
+        for x in result]
+            
+        return data
+
+
 @UserNs.route('/Detail')
 class UserDetail(Resource):
     @UserNs.expect(user_detail_request_model)
@@ -199,7 +232,8 @@ class UserDetail(Resource):
                     "id": x[13],
                     "admin_name": x[14],
                     "admin_phone": x[15],
-                    "access_time": x[18].strftime('%Y-%m-%d %H:%M:%S')
+                    "access_time": x[18].strftime('%Y-%m-%d %H:%M:%S'),
+                    "company_name": x[19]
                 }
             return data
         else:
@@ -469,18 +503,19 @@ class NoticeRegister(Resource):
     def post(self):
         """공지 등록"""
         register_data: dict = request.form.to_dict()
+        
 
         now = datetime.now()
         timestamp = now.strftime('%Y%m%d%H%M%S')
         register_data['attachment'] = ''
 
-        f = request.files['file'] 
-        f.filename = html.unescape(f.filename)
-        print(f.filename)
-        if f.filename != '':
-            os.makedirs('upload/' + timestamp)
-            f.save('upload/' + timestamp + '/' + f.filename)
-            register_data['attachment'] = f.filename
+        if 'file' in request.files:
+            f = request.files['file'] 
+            f.filename = html.unescape(f.filename)
+            if f.filename != '':
+                os.makedirs('upload/' + timestamp)
+                f.save('upload/' + timestamp + '/' + f.filename)
+                register_data['attachment'] = f.filename
         
         essential_keys = ['project_id', 'title', 'content', 'create_by']
         check_response = utils.check_key_value_in_data_is_validate(data=register_data, keys=essential_keys)
@@ -508,6 +543,7 @@ class NoticeUpdate(Resource):
     def post(self):
         """공지 수정"""
         update_data: dict = request.form.to_dict()
+        
 
         essential_keys = ['notice_id', 'project_id', 'title', 'content', 'change']
         check_response = utils.check_key_value_in_data_is_validate(data=update_data, keys=essential_keys)
@@ -524,7 +560,7 @@ class NoticeUpdate(Resource):
 
         timestamp = data[0].strftime('%Y%m%d%H%M%S')
 
-        if update_data['change']:
+        if update_data['change'] == '1':
             update_data['attachment'] = ''
 
             f = request.files['file'] 
@@ -557,7 +593,8 @@ class NoticeList(Resource):
     @NoticeNs.response(400, 'FAIL', fail_response_model)
     def post(self):
         """공지 목록"""
-        result = db_utils.get_notice_list()
+        search_data: dict = request.json
+        result = db_utils.get_notice_list(search_data)
 
         data = [{
                 'id': x[0], 
@@ -567,6 +604,7 @@ class NoticeList(Resource):
                 'create_time': x[4].strftime('%Y-%m-%d %H:%M:%S'),
                 'views': x[5],
                 'attachment': x[6],
+                'project_id': x[7],
             }
         for x in result]
             
@@ -600,6 +638,7 @@ class NoticeDetail(Resource):
                 'create_time': x[5].strftime('%Y-%m-%d %H:%M:%S'),
                 'views': x[6],
                 'attachment': x[7],
+                'project_id': x[8]
             }
             return data
         else:
@@ -668,7 +707,7 @@ class InquiryList(Resource):
                 'created_date': x[5].strftime('%Y-%m-%d %H:%M:%S'), 
             }
         for x in result]
-            
+
         return data
 
 @InquiryNs.route('/Delete')
