@@ -61,8 +61,8 @@ user_login_response_model = UserNs.model('user_login_response_model', user_login
 
 user_signup_request_form = {
                         'user_type': fields.Integer(),#1:admin, 2:수탁사, 3: 위탁사
-                        'user_email': fields.String(description="asd"),
-                        'nickname': fields.String(),
+                        'user_email': fields.String(),
+                        'id': fields.String(),
                         'user_password': fields.String(),
                         'register_num': fields.String(),
                         'company_address': fields.String(),
@@ -264,7 +264,8 @@ notice_data_form = {
                         'create_by': fields.String(),
                         'create_time': fields.String(),
                         'attachment': fields.String(),
-                        'views': fields.Integer()
+                        'views': fields.Integer(),
+                        'project_id': fields.Integer(),
                     }
 
 notice_data_model = NoticeNs.model('notice_data_model', notice_data_form)
@@ -285,7 +286,8 @@ notice_detail_form = {
                         'create_by': fields.String(),
                         'create_time': fields.String(),
                         'attachment': fields.String(),
-                        'views': fields.Integer()
+                        'views': fields.Integer(),
+                        'project_id': fields.Integer(),
                     }
 
 notice_detail_model = NoticeNs.model('notice_detail_model', notice_detail_form)

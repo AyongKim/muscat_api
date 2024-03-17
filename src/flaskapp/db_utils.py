@@ -81,7 +81,7 @@ def check_email_duplication_with_id(email, id):
     return res[0] if res else None
 
 def register_user(data):
-    nickname = data['nickname']
+    nickname = data['id']
     user_email = data['user_email']
     user_password = hashing_password(data['user_password'])
     user_type = str(data['user_type'])
@@ -92,7 +92,7 @@ def register_user(data):
     manager_depart = data['manager_depart'] if 'manager_depart' in data else ''
     manager_grade = data['manager_grade'] if 'manager_grade' in data else ''
     other = data['other'] if 'other' in data else ''
-    approval = str(0)
+    approval = data['approval'] if 'approval' in data else ''
     admin_name = data['admin_name'] if 'admin_name' in data else ''
     admin_phone = data['admin_phone'] if 'admin_phone' in data else ''
 
@@ -105,6 +105,10 @@ def update_user(data):
     data_list = []
     update_list = []
 
+    if 'user_password' in data:
+        data['user_password'] = hashing_password(data['user_password'])
+
+    print(data)
     for k, v in data.items():
         if k in ['user_email', 'user_password', 'company_address', 'manager_name', 'manager_phone', 'manager_depart', 'manager_grade', 'other', 'approval', 'nickname', 'admin_name', 'admin_phone', 'code', 'updated_time', 'access_time']:
             update_list.append(f'{k} = %s')
@@ -121,7 +125,7 @@ def delete_user(str_ids):
     execute_query(query, ())
 
 def user_detail_by_id(id):
-    query = f'SELECT * FROM {USER_TABLE} ' \
+    query = f'SELECT A.*, B.company_name FROM {USER_TABLE} as A LEFT JOIN {COMPANY_TABLE} as B ON A.register_num = B.register_num ' \
             f'WHERE user_id = "{id}"'
     
     res = execute_query(query, ())
@@ -136,6 +140,12 @@ def user_check_id(id):
 
 def get_user_list():
     query = f'SELECT * FROM {USER_TABLE}'
+
+    data = execute_query(query, ())
+    return data
+
+def get_approval_user_list():
+    query = f'SELECT * FROM {USER_TABLE} WHERE approval < 2 AND user_type > 0'
 
     data = execute_query(query, ())
     return data
@@ -254,7 +264,7 @@ def get_notice_attachment(id):
     return res[0] if res else None
 
 def notice_detail_by_id(id):
-    query = f'SELECT A.id, B.name, A.title, A.content, A.create_by, A.create_time, A.views, A.attachment FROM {NOTICE_TABLE} as A LEFT JOIN project as B ON A.project_id=B.id WHERE A.id={id}'
+    query = f'SELECT A.id, B.name, A.title, A.content, A.create_by, A.create_time, A.views, A.attachment, A.project_id FROM {NOTICE_TABLE} as A LEFT JOIN project as B ON A.project_id=B.id WHERE A.id={id}'
 
     res = execute_query(query, ())
     return res[0] if res else None
@@ -273,8 +283,18 @@ def update_notice(data):
         data_list.append(data['notice_id'])
         execute_query(query, tuple(data_list))
 
-def get_notice_list():
-    query = f'SELECT A.id, B.name, A.title, A.create_by, A.create_time, A.views, A.attachment FROM {NOTICE_TABLE} as A LEFT JOIN project as B ON A.project_id=B.id'
+def get_notice_list(search_data):
+    where = '1 '
+
+    if 'search_type' in search_data and 'keyword' in search_data and search_data['keyword'] != '':
+        if search_data["search_type"] == 1:
+            where += f'AND A.title LIKE "%{search_data["keyword"]}%"'
+        elif search_data["search_type"] == 2:
+            where += f'AND (A.title LIKE "%{search_data["keyword"]}%" OR A.content LIKE "%{search_data["keyword"]}%")'
+        elif search_data["search_type"] == 3:
+            where += f'AND (A.create_by LIKE "%{search_data["keyword"]}%")'
+
+    query = f'SELECT A.id, B.name, A.title, A.create_by, A.create_time, A.views, A.attachment, A.project_id FROM {NOTICE_TABLE} as A LEFT JOIN project as B ON A.project_id=B.id WHERE {where}'
 
     data = execute_query(query, ())
     return data
