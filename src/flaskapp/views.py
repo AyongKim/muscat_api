@@ -529,7 +529,7 @@ class UserList(Resource):
     
 @ProjectNs.route('/Years')
 class Year(Resource):
-    @UserNs.response(200, 'SUCCESS', year_list_form)
+    @UserNs.response(200, 'SUCCESS', year_list_model)
     @UserNs.response(400, 'FAIL', fail_response_model)
     def post(self):
         """프로젝트 목록"""
