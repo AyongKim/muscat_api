@@ -444,3 +444,10 @@ checklist_delete_form = {
 }
 
 checklist_delete_model = ChecklistNs.model('checklist_delete_model', checklist_delete_form)
+
+
+year_list_form = {
+                        'years': fields.List(fields.Integer)
+                    }
+
+year_list_model = ProjectNs.model('year_list_model', year_list_form)
