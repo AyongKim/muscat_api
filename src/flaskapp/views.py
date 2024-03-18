@@ -168,6 +168,36 @@ class UserList(Resource):
             
         return data
 
+@ProjectNs.route('/Consignor')
+class UserList(Resource):
+    @UserNs.response(200, 'SUCCESS', user_list_model)
+    @UserNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """유저 목록"""
+        result = db_utils.get_user_list()
+
+        data = [{
+                "user_id": x[0],
+                "user_email": x[1],
+                "user_type": x[3],
+                "register_num": x[5],
+                "company_address": x[6],
+                "manager_name": x[7],
+                "manager_phone": x[8],
+                "manager_depart": x[9],
+                "manager_grade": x[10],
+                "other": x[11],
+                "approval": x[12],
+                "id": x[13],
+                "admin_name": x[14],
+                "admin_phone": x[15],
+                "access_time": x[18].strftime('%Y-%m-%d %H:%M:%S')
+            }
+        for x in result]
+            
+        return data
+
+
 @UserNs.route('/ApprovalList')
 class UserApprovalList(Resource):
     @UserNs.response(200, 'SUCCESS', user_list_model)
@@ -481,7 +511,9 @@ class UserList(Resource):
     @UserNs.response(400, 'FAIL', fail_response_model)
     def post(self):
         """프로젝트 목록"""
-        result = db_utils.get_project_list()
+        search_data: dict = request.json
+        print(search_data)
+        result = db_utils.get_project_list(search_data)
 
         data = [{
                 'id': x[0], 
@@ -492,6 +524,18 @@ class UserList(Resource):
                 'privacy_type': x[5],
             }
         for x in result]
+            
+        return data
+    
+@ProjectNs.route('/Years')
+class Year(Resource):
+    @UserNs.response(200, 'SUCCESS', year_list_form)
+    @UserNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """프로젝트 목록"""
+        result = db_utils.get_year_list()
+
+        data = [x[0] for x in result]
             
         return data
 

@@ -237,8 +237,24 @@ def get_project_schedule(id):
     res = execute_query(query, (id))
     return res[0] if res else None
 
-def get_project_list():
-    query = f'SELECT id, year, name, user_id, checklist_id, privacy_type FROM {PROJECT_TABLE}'
+def get_project_list(data):
+    where = "1 "
+
+    if 'year' in data and data['year'] != 0:
+        where += f'AND A.year = {data["year"]} '
+    if 'project_name' in data:
+        where += f'AND A.name LIKE "%{data["project_name"]}%" '
+    if 'consignor_name' in data:
+        where += f'AND B.nickname LIKE "%{data["consignor_name"]}%" '
+    
+    query = f'SELECT A.id, A.year, A.name, A.user_id, A.checklist_id, A.privacy_type FROM {PROJECT_TABLE} as A LEFT JOIN {USER_TABLE} as B ON A.user_id = B.user_id WHERE {where}'
+    print(query)
+
+    data = execute_query(query, ())
+    return data
+
+def get_year_list():
+    query = f'SELECT year FROM {PROJECT_TABLE} GROUP BY year ORDER BY year DESC'
 
     data = execute_query(query, ())
     return data
