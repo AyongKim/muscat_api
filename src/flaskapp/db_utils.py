@@ -144,6 +144,18 @@ def get_user_list():
     data = execute_query(query, ())
     return data
 
+def get_consignor_list():
+    query = f'SELECT A.user_id, A.nickname FROM {USER_TABLE} as A WHERE A.user_type = 2'
+
+    data = execute_query(query, ())
+    return data
+
+def get_consignee_list():
+    query = f'SELECT A.user_id, A.nickname FROM {USER_TABLE} as A WHERE A.user_type = 1'
+
+    data = execute_query(query, ())
+    return data
+
 def get_approval_user_list():
     query = f'SELECT * FROM {USER_TABLE} WHERE approval < 2 AND user_type > 0'
 
@@ -242,12 +254,17 @@ def get_project_list(data):
 
     if 'year' in data and data['year'] != 0:
         where += f'AND A.year = {data["year"]} '
-    if 'project_name' in data:
+    if 'project_name' in data and data['project_name'] != '!@#':
         where += f'AND A.name LIKE "%{data["project_name"]}%" '
     if 'consignor_name' in data:
         where += f'AND B.nickname LIKE "%{data["consignor_name"]}%" '
     
-    query = f'SELECT A.id, A.year, A.name, A.user_id, A.checklist_id, A.privacy_type FROM {PROJECT_TABLE} as A LEFT JOIN {USER_TABLE} as B ON A.user_id = B.user_id WHERE {where}'
+    query = f'SELECT A.id, A.year, A.name, B.nickname, C.checklist_item, D.personal_category, B.manager_name, B.manager_grade '\
+        f'FROM {PROJECT_TABLE} as A '\
+        f'LEFT JOIN {USER_TABLE} as B ON A.user_id = B.user_id '\
+        f'LEFT JOIN {CHECKLIST_TABLE} as C ON A.checklist_id = C.id '\
+        f'LEFT JOIN {PERSONAL_CATEGORY_TABLE} as D ON A.privacy_type = D.id '\
+        f'WHERE {where}'
     print(query)
 
     data = execute_query(query, ())
@@ -255,6 +272,12 @@ def get_project_list(data):
 
 def get_year_list():
     query = f'SELECT year FROM {PROJECT_TABLE} GROUP BY year ORDER BY year DESC'
+
+    data = execute_query(query, ())
+    return data
+
+def get_project_name_list():
+    query = f'SELECT name FROM {PROJECT_TABLE} GROUP BY name'
 
     data = execute_query(query, ())
     return data
@@ -417,3 +440,44 @@ def delete_checklist_item(str_ids):
     query = f'DELETE FROM {CHECKLIST_TABLE} WHERE id in ({str_ids})'
 
     execute_query(query, ())
+
+
+def register_project_detail(data):
+    project_id = data['project_id']
+    user_id = data['user_id']
+    work_name = data['work_name']
+    check_type = data['check_type']
+
+    query = f'INSERT INTO {PROJECT_DETAIL_TABLE} (project_id, user_id, work_name, check_type) '\
+            f'VALUES (%s, %s, %s, %s)'
+    return execute_query(query, (project_id, user_id, work_name, check_type))
+
+def get_project_detail_list(data):
+    
+    query = f'SELECT A.id, A.user_id, B.nickname, A.work_name, C.manager_name, C.manager_grade, A.check_type '\
+        f'FROM {PROJECT_DETAIL_TABLE} as A '\
+        f'LEFT JOIN (SELECT P.id, U.manager_name, U.manager_grade from {PROJECT_TABLE} as P LEFT JOIN {USER_TABLE} as U ON P.user_id = U.user_id) as C ON A.project_id = C.id '\
+        f'LEFT JOIN {USER_TABLE} as B ON B.user_id = A.user_id '\
+        f'WHERE project_id = {data["project_id"]}'
+
+    data = execute_query(query, ())
+    return data
+
+def delete_project_detail(str_ids):
+    query = f'DELETE FROM {PROJECT_DETAIL_TABLE} WHERE id in ({str_ids})'
+
+    execute_query(query, ())
+
+def update_project_detail(data):
+    data_list = []
+    update_list = []
+
+    for k, v in data.items():
+        if k in ['user_id', 'work_name', 'check_type']:
+            update_list.append(f'{k} = %s')
+            data_list.append(str(v))
+
+    if update_list.__len__ != 0:
+        query = f'UPDATE {PROJECT_DETAIL_TABLE} SET {",".join(update_list)} WHERE id = %s'
+        data_list.append(data['id'])
+        execute_query(query, tuple(data_list))

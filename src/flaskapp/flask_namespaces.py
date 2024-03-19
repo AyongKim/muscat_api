@@ -8,6 +8,7 @@ from flaskapp.swagger_type import *
 UserNs = Namespace('user', path='/user', description='유저의 register, login, pairing 등을 위한 API',decorators=[cross_origin()])
 CompanyNs = Namespace('company', path='/company', description='업체 API',decorators=[cross_origin()])
 ProjectNs = Namespace('project', path='/project', description='프로젝트 API',decorators=[cross_origin()])
+ProjectDetailNs = Namespace('project_detail', path='/project_detail', description='프로젝트 현황 API',decorators=[cross_origin()])
 NoticeNs = Namespace('notice', path='/notice', description='공지 API',decorators=[cross_origin()])
 InquiryNs = Namespace('inquiry', path='/inquiry', description='문의 API',decorators=[cross_origin()])
 PersonalCategoryNs = Namespace('personal_category', path='/personal_category', description='개인정보취급분류 API',decorators=[cross_origin()])
@@ -15,7 +16,7 @@ PersonalInfoNs = Namespace('personal_info', path='/personal_info', description='
 ChecklistNs = Namespace('checklist', path='/checklist', description='체크리스트 API',decorators=[cross_origin()])
 
 
-namespaces = [UserNs, CompanyNs, ProjectNs, NoticeNs, ChecklistNs, InquiryNs, PersonalCategoryNs, PersonalInfoNs]
+namespaces = [UserNs, CompanyNs, ProjectNs, NoticeNs, ChecklistNs, InquiryNs, PersonalCategoryNs, PersonalInfoNs, ProjectDetailNs]
 
 
 def _data_response_model(data_form, ns, model_name, list_form=False, data_key='data', sort_result=False):
@@ -60,7 +61,7 @@ user_login_response_form = {'loginResult': fields.Integer(1),
 user_login_response_model = UserNs.model('user_login_response_model', user_login_response_form)
 
 user_signup_request_form = {
-                        'user_type': fields.Integer(),#1:admin, 2:수탁사, 3: 위탁사
+                        'user_type': fields.Integer(),#0:admin, 1:수탁사, 2: 위탁사
                         'user_email': fields.String(),
                         'id': fields.String(),
                         'user_password': fields.String(),
@@ -130,6 +131,19 @@ user_list_form = {
 }
 
 user_list_model = UserNs.model('user_list_model', user_list_form)
+
+user_consignor_data_form = {
+                        'user_id': fields.Integer(),
+                        'name': fields.String(),
+                        }
+
+user_consignor_data_model = UserNs.model('user_consignor_data_model', user_consignor_data_form)
+
+user_consignor_list_form = {
+    'data': fields.List(fields.Nested(user_consignor_data_model))
+}
+
+user_consignor_list_model = UserNs.model('user_consignor_list_model', user_consignor_list_form)
 
 user_delete_model = UserNs.model('user_delete_model', delete_form)
 
@@ -226,6 +240,7 @@ project_data_form = {
                         'user_id': fields.Integer(), 
                         'checklist_id': fields.Integer(),
                         'privacy_type': fields.Integer(),
+                        'checker': fields.String(),
                     }
 
 project_data_model = ProjectNs.model('project_data_model', project_data_form)
@@ -457,3 +472,60 @@ year_list_form = {
                     }
 
 year_list_model = ProjectNs.model('year_list_model', year_list_form)
+
+project_detail_request_form = {
+                        'id': fields.Integer()
+                    }
+project_detail_request_model = ProjectDetailNs.model('project_detail_request_model', project_detail_request_form)
+
+
+project_detail_data_form = {
+                        'id': fields.Integer(), 
+                        'user_id': fields.Integer(), 
+                        'user_name': fields.String(), 
+                        'work_name': fields.String(), 
+                        'checker_name': fields.String(), 
+                        'check_type': fields.String(), 
+                    }
+
+project_detail_data_model = ProjectDetailNs.model('project_detail_data_model', project_detail_data_form)
+
+project_detail_list_form = {
+    'data': fields.List(fields.Nested(project_detail_data_model))
+}
+
+project_detail_list_model = ProjectDetailNs.model('project_detail_list_model', project_detail_list_form)
+
+project_detail_register_request_form = {
+                        'project_id': fields.Integer(), 
+                        'user_id': fields.Integer(), 
+                        'work_name': fields.String(), 
+                        'check_type': fields.Integer(),
+                        }
+
+project_detail_register_request_model = ProjectDetailNs.model('project_detail_register_request_model', project_detail_register_request_form)
+
+
+user_consignee_data_form = {
+                        'user_id': fields.Integer(),
+                        'name': fields.String(),
+                        }
+
+user_consignee_data_model = UserNs.model('user_consignee_data_model', user_consignee_data_form)
+
+user_consignee_list_form = {
+    'data': fields.List(fields.Nested(user_consignee_data_model))
+}
+
+user_consignee_list_model = UserNs.model('user_consignee_list_model', user_consignee_list_form)
+
+project_detail_delete_model = ProjectDetailNs.model('project_detail_delete_model', delete_form)
+
+project_detail_update_form = {
+                        'id': fields.Integer(),
+                        'user_id': fields.Integer(), 
+                        'work_name': fields.String(), 
+                        'check_type': fields.Integer(),
+                        }
+
+project_detail_update_model = ProjectDetailNs.model('project_detail_update_model', project_detail_update_form)
