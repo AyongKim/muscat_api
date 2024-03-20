@@ -13,3 +13,4 @@ six==1.16.0
 Werkzeug==2.2.2
 pytz==2022.6
 APScheduler==3.10.1
+openpyxl==3.1.2

@@ -38,7 +38,7 @@ class Login(Resource):
         if (result == None):
             res['loginResult'] = 2
         else:
-            if 'code' in login_data:
+            if 'code' in login_data :
                 today = datetime.today()
                 if result[3]:
                     diff = today - result[3]
@@ -46,8 +46,13 @@ class Login(Resource):
                     if login_data['code'] == result[2] and diff.total_seconds() < 180:
                         res['loginResult'] = 1
                         res['userData'] = {}
-                        res['userData']['userEmail'] = result[0]
-                        res['userData']['userType'] = result[1]
+                        res['userData']['email'] = result[0]
+                        res['userData']['type'] = result[1]
+                        res['userData']['user_id'] = result[4]
+                        if result[1] == 0 or result[2] == 4:
+                            res['userData']['name'] = result[5]
+                        else:
+                            res['userData']['name'] = result[6]
 
                         update_data={}
                         update_data['user_id'] = result[4]
@@ -61,6 +66,14 @@ class Login(Resource):
             else:
                 res['loginResult'] = 1
                 res['authRequired'] = True
+                res['userData'] = {}
+                res['userData']['email'] = result[0]
+                res['userData']['type'] = result[1]
+                res['userData']['user_id'] = result[4]
+                if result[1] == 0 or result[1] == 3:
+                    res['userData']['name'] = result[5]
+                else:
+                    res['userData']['name'] = result[6]
 
                 new_code = ''.join(str(random.randrange(1, 10)) for i in range(0, 8))
 
@@ -71,7 +84,8 @@ class Login(Resource):
                 update_data['access_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 db_utils.update_user(update_data)
 
-                utils.send_mail(result[0], '인증메일 발송', f'로그인을 위한 인증정보입니다.\n아래의 인증번호를 입력하여 인증을 완료해주세요.\n인증메일: {new_code} (유효시간: 3분)')
+                if result[1] != 3:
+                    utils.send_mail(result[0], '인증메일 발송', f'로그인을 위한 인증정보입니다.\n아래의 인증번호를 입력하여 인증을 완료해주세요.\n인증메일: {new_code} (유효시간: 3분)')
                 
         return res
 
@@ -169,34 +183,60 @@ class UserList(Resource):
         return data
 
 @ProjectNs.route('/Consignor')
-class UserList(Resource):
-    @UserNs.response(200, 'SUCCESS', user_list_model)
+class ConsignorList(Resource):
+    @UserNs.response(200, 'SUCCESS', user_consignor_list_model)
     @UserNs.response(400, 'FAIL', fail_response_model)
     def post(self):
-        """유저 목록"""
-        result = db_utils.get_user_list()
+        """위탁사 목록"""
+        result = db_utils.get_consignor_list()
 
         data = [{
                 "user_id": x[0],
-                "user_email": x[1],
-                "user_type": x[3],
-                "register_num": x[5],
-                "company_address": x[6],
-                "manager_name": x[7],
-                "manager_phone": x[8],
-                "manager_depart": x[9],
-                "manager_grade": x[10],
-                "other": x[11],
-                "approval": x[12],
-                "id": x[13],
-                "admin_name": x[14],
-                "admin_phone": x[15],
-                "access_time": x[18].strftime('%Y-%m-%d %H:%M:%S')
+                'name': x[1],
             }
         for x in result]
             
         return data
 
+@ProjectNs.route('/Consignee')
+class ConsigneeList(Resource):
+    @UserNs.response(200, 'SUCCESS', user_consignee_list_model)
+    @UserNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """수탁사 목록"""
+        result = db_utils.get_consignee_list()
+
+        data = [{
+                "user_id": x[0],
+                'name': x[1],
+            }
+        for x in result]
+            
+        return data
+    
+@ProjectNs.route('/Users')
+class ConsigneeList(Resource):
+    @UserNs.response(200, 'SUCCESS', user_consignee_list_model)
+    @UserNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """수탁사 목록"""
+        result = db_utils.get_consignee_list()
+
+        consignee = [{
+                "user_id": x[0],
+                'name': x[1],
+            }
+        for x in result]
+
+        result = db_utils.get_admin_list()
+
+        admin = [{
+                "user_id": x[0],
+                'name': x[1],
+            }
+        for x in result]
+            
+        return {'consignee': consignee, 'admin': admin}
 
 @UserNs.route('/ApprovalList')
 class UserApprovalList(Resource):
@@ -438,6 +478,7 @@ class ProjectRegister(Resource):
     def post(self):
         """프로젝트 등록"""
         register_data: dict = request.json
+        print(register_data)
         
         essential_keys = ['year', 'name', 'user_id', 'checklist_id', 'privacy_type']
         check_response = utils.check_key_value_in_data_is_validate(data=register_data, keys=essential_keys)
@@ -506,13 +547,12 @@ class ProjectSchedule(Resource):
         return res
 
 @ProjectNs.route('/List')
-class UserList(Resource):
+class ProjectList(Resource):
     @UserNs.response(200, 'SUCCESS', project_list_model)
     @UserNs.response(400, 'FAIL', fail_response_model)
     def post(self):
         """프로젝트 목록"""
-        search_data: dict = request.json
-        print(search_data)
+        search_data: dict =  request.form.to_dict()
         result = db_utils.get_project_list(search_data)
 
         data = [{
@@ -522,22 +562,26 @@ class UserList(Resource):
                 'user_id': x[3],
                 'checklist_id': x[4],
                 'privacy_type': x[5],
+                'checker': x[6] + x[7]
             }
         for x in result]
             
+        print(result)
         return data
     
-@ProjectNs.route('/Years')
+@ProjectNs.route('/SearchItem')
 class Year(Resource):
     @UserNs.response(200, 'SUCCESS', year_list_model)
     @UserNs.response(400, 'FAIL', fail_response_model)
     def post(self):
-        """프로젝트 목록"""
-        result = db_utils.get_year_list()
+        """프로젝트 검색목록"""
+        data = db_utils.get_year_list()
+        years = [x[0] for x in data]
 
-        data = [x[0] for x in result]
-            
-        return data
+        data = db_utils.get_project_name_list()
+        names = [x[0] for x in data]
+
+        return {'years': years, 'names': names}
 
 @NoticeNs.route('/Register')
 class NoticeRegister(Resource):
@@ -1005,3 +1049,96 @@ class ChecklistDelete(Resource):
         db_utils.delete_checklist_item(delete_data['id'])
 
         return {'result': 'SUCCESS'}
+
+
+@ProjectDetailNs.route('/Register')
+class ProjectDetailRegister(Resource):
+    @ProjectDetailNs.expect(project_detail_register_request_model)
+    @ProjectDetailNs.response(200, 'SUCCESS', success_response_model)
+    @ProjectDetailNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """프로젝트 수탁사등록"""
+        register_data: dict = request.json
+        print(register_data)
+        
+        essential_keys = ['project_id', 'user_id', 'work_name', 'checker_id', 'check_type']
+        check_response = utils.check_key_value_in_data_is_validate(data=register_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        res = {}
+        res['id'] = db_utils.register_project_detail(register_data)
+        res['result'] = SUCCESS_VALUE
+        
+        return res
+
+
+@ProjectDetailNs.route('/List')
+class ProjectDetailList(Resource):
+    @ProjectDetailNs.expect(project_detail_request_model)
+    @UserNs.response(200, 'SUCCESS', project_detail_list_model)
+    @UserNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """프로젝트 수탁사현황목록"""
+        search_data: dict = request.json
+
+        essential_keys = ['project_id']
+        check_response = utils.check_key_value_in_data_is_validate(data=search_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        result = db_utils.get_project_detail_list(search_data)
+
+        data = [{
+                'id': x[0], 
+                'user_id': x[1], 
+                'user_name': x[2], 
+                'work_name': x[3], 
+                'checker_id': x[4] ,
+                'checker_name': x[5] ,
+                'check_type': x[6], 
+            }
+        for x in result]
+            
+        print(result)
+        return data
+
+@ProjectDetailNs.route('/Delete')
+class ProjectDetailDelete(Resource):
+    @ProjectDetailNs.expect(project_detail_delete_model)
+    @ProjectDetailNs.response(200, 'SUCCESS', success_response_model)
+    @ProjectDetailNs.response(400, 'FAIL', fail_response_model)
+    def delete(self):
+        """유저 삭제"""
+        delete_data: dict = request.json
+
+        essential_keys = ['str_ids']
+        check_response = utils.check_key_value_in_data_is_validate(data=delete_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        db_utils.delete_project_detail(delete_data['str_ids'])
+
+        return SUCCESS_RESPONSE
+    
+@ProjectDetailNs.route('/Update')
+class CompanyUpdate(Resource):
+    @ProjectDetailNs.expect(project_detail_update_model)
+    @ProjectDetailNs.response(200, 'SUCCESS', success_response_model)
+    @ProjectDetailNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """프로젝트 수탁사현황수정"""
+        update_data: dict = request.json
+
+        essential_keys = ['id']
+        check_response = utils.check_key_value_in_data_is_validate(data=update_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        db_utils.update_project_detail(update_data)
+        
+        return SUCCESS_RESPONSE
