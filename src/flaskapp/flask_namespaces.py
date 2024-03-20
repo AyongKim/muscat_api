@@ -484,6 +484,7 @@ project_detail_data_form = {
                         'user_id': fields.Integer(), 
                         'user_name': fields.String(), 
                         'work_name': fields.String(), 
+                        'checker_id': fields.Integer(), 
                         'checker_name': fields.String(), 
                         'check_type': fields.String(), 
                     }
@@ -500,6 +501,7 @@ project_detail_register_request_form = {
                         'project_id': fields.Integer(), 
                         'user_id': fields.Integer(), 
                         'work_name': fields.String(), 
+                        'checker_id': fields.Integer(), 
                         'check_type': fields.Integer(),
                         }
 
@@ -525,6 +527,7 @@ project_detail_update_form = {
                         'id': fields.Integer(),
                         'user_id': fields.Integer(), 
                         'work_name': fields.String(), 
+                        'checker_id': fields.Integer(), 
                         'check_type': fields.Integer(),
                         }
 

@@ -38,7 +38,7 @@ class Login(Resource):
         if (result == None):
             res['loginResult'] = 2
         else:
-            if 'code' in login_data:
+            if 'code' in login_data :
                 today = datetime.today()
                 if result[3]:
                     diff = today - result[3]
@@ -46,8 +46,13 @@ class Login(Resource):
                     if login_data['code'] == result[2] and diff.total_seconds() < 180:
                         res['loginResult'] = 1
                         res['userData'] = {}
-                        res['userData']['userEmail'] = result[0]
-                        res['userData']['userType'] = result[1]
+                        res['userData']['email'] = result[0]
+                        res['userData']['type'] = result[1]
+                        res['userData']['user_id'] = result[4]
+                        if result[1] == 0 or result[2] == 4:
+                            res['userData']['name'] = result[5]
+                        else:
+                            res['userData']['name'] = result[6]
 
                         update_data={}
                         update_data['user_id'] = result[4]
@@ -61,6 +66,14 @@ class Login(Resource):
             else:
                 res['loginResult'] = 1
                 res['authRequired'] = True
+                res['userData'] = {}
+                res['userData']['email'] = result[0]
+                res['userData']['type'] = result[1]
+                res['userData']['user_id'] = result[4]
+                if result[1] == 0 or result[1] == 3:
+                    res['userData']['name'] = result[5]
+                else:
+                    res['userData']['name'] = result[6]
 
                 new_code = ''.join(str(random.randrange(1, 10)) for i in range(0, 8))
 
@@ -71,7 +84,8 @@ class Login(Resource):
                 update_data['access_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 db_utils.update_user(update_data)
 
-                utils.send_mail(result[0], '인증메일 발송', f'로그인을 위한 인증정보입니다.\n아래의 인증번호를 입력하여 인증을 완료해주세요.\n인증메일: {new_code} (유효시간: 3분)')
+                if result[1] != 3:
+                    utils.send_mail(result[0], '인증메일 발송', f'로그인을 위한 인증정보입니다.\n아래의 인증번호를 입력하여 인증을 완료해주세요.\n인증메일: {new_code} (유효시간: 3분)')
                 
         return res
 
@@ -199,6 +213,30 @@ class ConsigneeList(Resource):
         for x in result]
             
         return data
+    
+@ProjectNs.route('/Users')
+class ConsigneeList(Resource):
+    @UserNs.response(200, 'SUCCESS', user_consignee_list_model)
+    @UserNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """수탁사 목록"""
+        result = db_utils.get_consignee_list()
+
+        consignee = [{
+                "user_id": x[0],
+                'name': x[1],
+            }
+        for x in result]
+
+        result = db_utils.get_admin_list()
+
+        admin = [{
+                "user_id": x[0],
+                'name': x[1],
+            }
+        for x in result]
+            
+        return {'consignee': consignee, 'admin': admin}
 
 @UserNs.route('/ApprovalList')
 class UserApprovalList(Resource):
@@ -514,8 +552,7 @@ class ProjectList(Resource):
     @UserNs.response(400, 'FAIL', fail_response_model)
     def post(self):
         """프로젝트 목록"""
-        search_data: dict = request.json
-        print(search_data)
+        search_data: dict =  request.form.to_dict()
         result = db_utils.get_project_list(search_data)
 
         data = [{
@@ -1024,7 +1061,7 @@ class ProjectDetailRegister(Resource):
         register_data: dict = request.json
         print(register_data)
         
-        essential_keys = ['project_id', 'user_id', 'work_name', 'check_type']
+        essential_keys = ['project_id', 'user_id', 'work_name', 'checker_id', 'check_type']
         check_response = utils.check_key_value_in_data_is_validate(data=register_data, keys=essential_keys)
 
         if check_response['result'] == FAIL_VALUE:
@@ -1059,7 +1096,8 @@ class ProjectDetailList(Resource):
                 'user_id': x[1], 
                 'user_name': x[2], 
                 'work_name': x[3], 
-                'checker_name': x[4] + " " + x[5], 
+                'checker_id': x[4] ,
+                'checker_name': x[5] ,
                 'check_type': x[6], 
             }
         for x in result]

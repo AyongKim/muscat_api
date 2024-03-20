@@ -60,7 +60,7 @@ def execute_query(base_query: str, var_tuple: tuple):
 def check_login(email, password):
     password = hashing_password(password)
 
-    query = f'SELECT user_email, user_type, code, updated_time, user_id FROM {USER_TABLE} ' \
+    query = f'SELECT user_email, user_type, code, updated_time, user_id, admin_name, nickname FROM {USER_TABLE} ' \
             f'WHERE user_email = %s AND user_password = %s '
     
     res = execute_query(query, (email, password))
@@ -139,19 +139,25 @@ def user_check_id(id):
     return res[0] if res else None
 
 def get_user_list():
-    query = f'SELECT * FROM {USER_TABLE}'
+    query = f'SELECT * FROM {USER_TABLE} WHERE user_type < 3'
 
     data = execute_query(query, ())
     return data
 
 def get_consignor_list():
-    query = f'SELECT A.user_id, A.nickname FROM {USER_TABLE} as A WHERE A.user_type = 2'
+    query = f'SELECT A.user_id, A.nickname FROM {USER_TABLE} as A WHERE A.user_type = 2 AND A.approval = 2'
 
     data = execute_query(query, ())
     return data
 
 def get_consignee_list():
-    query = f'SELECT A.user_id, A.nickname FROM {USER_TABLE} as A WHERE A.user_type = 1'
+    query = f'SELECT A.user_id, A.nickname FROM {USER_TABLE} as A WHERE A.user_type = 1 AND A.approval = 2'
+
+    data = execute_query(query, ())
+    return data
+
+def get_admin_list():
+    query = f'SELECT A.user_id, A.admin_name FROM {USER_TABLE} as A WHERE A.user_type = 0 AND A.approval = 2'
 
     data = execute_query(query, ())
     return data
@@ -446,18 +452,19 @@ def register_project_detail(data):
     project_id = data['project_id']
     user_id = data['user_id']
     work_name = data['work_name']
+    checker_id = data['checker_id']
     check_type = data['check_type']
 
-    query = f'INSERT INTO {PROJECT_DETAIL_TABLE} (project_id, user_id, work_name, check_type) '\
-            f'VALUES (%s, %s, %s, %s)'
-    return execute_query(query, (project_id, user_id, work_name, check_type))
+    query = f'INSERT INTO {PROJECT_DETAIL_TABLE} (project_id, user_id, work_name, checker_id, check_type) '\
+            f'VALUES (%s, %s, %s, %s, %s)'
+    return execute_query(query, (project_id, user_id, work_name, checker_id, check_type))
 
 def get_project_detail_list(data):
     
-    query = f'SELECT A.id, A.user_id, B.nickname, A.work_name, C.manager_name, C.manager_grade, A.check_type '\
+    query = f'SELECT A.id, A.user_id, B.nickname, A.work_name, A.checker_id, C.admin_name, A.check_type '\
         f'FROM {PROJECT_DETAIL_TABLE} as A '\
-        f'LEFT JOIN (SELECT P.id, U.manager_name, U.manager_grade from {PROJECT_TABLE} as P LEFT JOIN {USER_TABLE} as U ON P.user_id = U.user_id) as C ON A.project_id = C.id '\
         f'LEFT JOIN {USER_TABLE} as B ON B.user_id = A.user_id '\
+        f'LEFT JOIN {USER_TABLE} as C ON C.user_id = A.checker_id '\
         f'WHERE project_id = {data["project_id"]}'
 
     data = execute_query(query, ())
@@ -473,7 +480,7 @@ def update_project_detail(data):
     update_list = []
 
     for k, v in data.items():
-        if k in ['user_id', 'work_name', 'check_type']:
+        if k in ['user_id', 'work_name', 'check_type', 'checker_id']:
             update_list.append(f'{k} = %s')
             data_list.append(str(v))
 
