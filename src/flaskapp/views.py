@@ -84,8 +84,7 @@ class Login(Resource):
                 update_data['access_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 db_utils.update_user(update_data)
 
-                if result[1] != 3:
-                    utils.send_mail(result[0], '인증메일 발송', f'로그인을 위한 인증정보입니다.\n아래의 인증번호를 입력하여 인증을 완료해주세요.\n인증메일: {new_code} (유효시간: 3분)')
+                utils.send_mail(result[0], '인증메일 발송', f'로그인을 위한 인증정보입니다.\n아래의 인증번호를 입력하여 인증을 완료해주세요.\n인증메일: {new_code} (유효시간: 3분)')
                 
         return res
 
