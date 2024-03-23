@@ -57,13 +57,11 @@ def execute_query(base_query: str, var_tuple: tuple):
         else:
             return query_result
 
-def check_login(email, password):
-    password = hashing_password(password)
-
-    query = f'SELECT user_email, user_type, code, updated_time, user_id, admin_name, nickname FROM {USER_TABLE} ' \
-            f'WHERE user_email = %s AND user_password = %s '
+def check_login(email):
+    query = f'SELECT user_email, user_type, code, updated_time, user_id, admin_name, nickname, user_password, try_count, lock_time FROM {USER_TABLE} ' \
+            f'WHERE user_email = %s'
     
-    res = execute_query(query, (email, password))
+    res = execute_query(query, (email))
     return res[0] if res else None
 
 def check_duplication(email, nickname):
@@ -110,7 +108,7 @@ def update_user(data):
 
     print(data)
     for k, v in data.items():
-        if k in ['user_email', 'user_password', 'company_address', 'manager_name', 'manager_phone', 'manager_depart', 'manager_grade', 'other', 'approval', 'nickname', 'admin_name', 'admin_phone', 'code', 'updated_time', 'access_time']:
+        if k in ['user_email', 'user_password', 'company_address', 'manager_name', 'manager_phone', 'manager_depart', 'manager_grade', 'other', 'approval', 'nickname', 'admin_name', 'admin_phone', 'code', 'updated_time', 'access_time', 'try_count', 'lock_time']:
             update_list.append(f'{k} = %s')
             data_list.append(str(v))
 
@@ -150,8 +148,24 @@ def get_consignor_list():
     data = execute_query(query, ())
     return data
 
+def get_project_detail(data):
+    query = f'SELECT id, create_date, self_check_date, imp_check_date, delay FROM {PROJECT_DETAIL_TABLE} '\
+            f'WHERE project_id={data["project_id"]} AND user_id={data["consignee_id"]} AND checker_id={data["admin_id"]}'
+
+    data = execute_query(query, ())
+    return data
+
 def get_consignee_list():
     query = f'SELECT A.user_id, A.nickname FROM {USER_TABLE} as A WHERE A.user_type = 1 AND A.approval = 2'
+
+    data = execute_query(query, ())
+    return data
+
+def get_consignee_list_by_admin(data):
+
+    query = f'SELECT B.user_id, B.company_name, B.company_address, B.manager_name, B.manager_phone from'\
+            f'(SELECT user_id FROM {PROJECT_DETAIL_TABLE} WHERE project_id = {data["project_id"]} AND checker_id = {data["admin_id"]}) as A '\
+            f'LEFT JOIN (SELECT D.company_name, C.user_id, C.company_address, C.manager_name, C.manager_phone from {USER_TABLE} as C LEFT JOIN {COMPANY_TABLE} as D ON C.register_num = D.register_num) as B ON A.user_id = B.user_id'
 
     data = execute_query(query, ())
     return data
@@ -271,7 +285,16 @@ def get_project_list(data):
         f'LEFT JOIN {CHECKLIST_TABLE} as C ON A.checklist_id = C.id '\
         f'LEFT JOIN {PERSONAL_CATEGORY_TABLE} as D ON A.privacy_type = D.id '\
         f'WHERE {where}'
-    print(query)
+
+    data = execute_query(query, ())
+    return data
+
+def get_projects_by_admin(data):
+    query = f'SELECT B.* FROM (SELECT project_id '\
+        f'FROM {PROJECT_DETAIL_TABLE} '\
+        f'WHERE checker_id={data["admin_id"]} '\
+        f'GROUP BY project_id) as A '\
+        f'LEFT JOIN {PROJECT_TABLE} as B ON A.project_id = B.id '\
 
     data = execute_query(query, ())
     return data
@@ -480,7 +503,7 @@ def update_project_detail(data):
     update_list = []
 
     for k, v in data.items():
-        if k in ['user_id', 'work_name', 'check_type', 'checker_id']:
+        if k in ['user_id', 'work_name', 'check_type', 'checker_id', 'delay', 'create_date', 'self_check_date', 'imp_check_date', 'check_schedule']:
             update_list.append(f'{k} = %s')
             data_list.append(str(v))
 
@@ -488,3 +511,13 @@ def update_project_detail(data):
         query = f'UPDATE {PROJECT_DETAIL_TABLE} SET {",".join(update_list)} WHERE id = %s'
         data_list.append(data['id'])
         execute_query(query, tuple(data_list))
+
+def get_project_check_schedule(data):
+    
+    query = f'SELECT A.check_schedule, A.id, A.user_id, A.checker_id, A.project_id, D.company_name '\
+        f'FROM {PROJECT_DETAIL_TABLE} as A LEFT JOIN '\
+        f'(SELECT B.user_id, C.company_name FROM {USER_TABLE} as B LEFT JOIN {COMPANY_TABLE} as C ON B.register_num = C.register_num) as D ON A.user_id = D.user_id '\
+        f' WHERE project_id={data["project_id"]} AND checker_id={data["admin_id"]}'
+
+    data = execute_query(query, ())
+    return data

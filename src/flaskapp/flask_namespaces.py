@@ -511,6 +511,9 @@ project_detail_register_request_model = ProjectDetailNs.model('project_detail_re
 user_consignee_data_form = {
                         'user_id': fields.Integer(),
                         'name': fields.String(),
+                        'company_address': fields.String(),
+                        'manager_name': fields.String(),
+                        'manager_phone':  fields.String()
                         }
 
 user_consignee_data_model = UserNs.model('user_consignee_data_model', user_consignee_data_form)
@@ -529,6 +532,34 @@ project_detail_update_form = {
                         'work_name': fields.String(), 
                         'checker_id': fields.Integer(), 
                         'check_type': fields.Integer(),
+                        'delay': fields.String(),
+                        'create_date': fields.String(),
+                        'self_check_date': fields.String(),
+                        'imp_check_date': fields.String(),
                         }
 
 project_detail_update_model = ProjectDetailNs.model('project_detail_update_model', project_detail_update_form)
+
+project_detail_get_request_form = {
+                        'project_id': fields.Integer(),
+                        'admin_id': fields.Integer(), 
+                        'consignee_id': fields.Integer(), 
+                        }
+
+project_detail_get_request_model = ProjectDetailNs.model('project_detail_get_request_model', project_detail_get_request_form)
+
+project_detail_get_response_form = {
+                        'id': fields.Integer(),
+                        'create_date': fields.String(),
+                        'self_check_date': fields.String(),
+                        'imp_check_date': fields.String(),
+                        'delay': fields.String(),
+                    }
+
+project_detail_get_response_model = ProjectDetailNs.model('project_detail_get_response_model', project_detail_get_response_form)
+
+project_detail_check_schedule_request_form = {
+                        'admin_id': fields.Integer(),
+                        'project_id': fields.Integer()
+                    }
+project_detail_check_schedule_request_model = ProjectDetailNs.model('project_detail_check_schedule_request_model', project_detail_check_schedule_request_form)
