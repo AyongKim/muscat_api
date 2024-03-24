@@ -39,9 +39,13 @@ class Login(Resource):
         update_data={}
 
         res={}
-        if (result == None):
+        if result == None:
             res['loginResult'] = 'no user'
         else:
+            if result[10] != 2:
+                res['loginResult'] = 'not allowed'
+                return res
+            
             flag = True
             if result[8] == 0:
                 today = datetime.today()

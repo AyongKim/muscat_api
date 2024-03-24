@@ -58,7 +58,7 @@ def execute_query(base_query: str, var_tuple: tuple):
             return query_result
 
 def check_login(email):
-    query = f'SELECT user_email, user_type, code, updated_time, user_id, admin_name, nickname, user_password, try_count, lock_time FROM {USER_TABLE} ' \
+    query = f'SELECT user_email, user_type, code, updated_time, user_id, admin_name, nickname, user_password, try_count, lock_time, approval FROM {USER_TABLE} ' \
             f'WHERE user_email = %s'
     
     res = execute_query(query, (email))
