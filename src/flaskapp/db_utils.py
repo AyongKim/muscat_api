@@ -131,7 +131,7 @@ def user_detail_by_id(id):
 
 def user_check_id(id):
     query = f'SELECT * FROM {USER_TABLE} ' \
-            f'WHERE nickname = "{id}"'
+            f'WHERE nickname = {id}'
     
     res = execute_query(query, ())
     return res[0] if res else None
@@ -151,7 +151,7 @@ def get_consignor_list():
 def get_project_detail(data):
     where = ''
     if 'admin_id' in data:
-        where = ' AND checker_id={data["admin_id"]}'
+        where = f' AND checker_id={data["admin_id"]}'
 
     query = f'SELECT id, create_date, self_check_date, imp_check_date, delay FROM {PROJECT_DETAIL_TABLE} '\
             f'WHERE project_id={data["project_id"]} AND user_id={data["consignee_id"]} {where}'
@@ -168,9 +168,9 @@ def get_consignee_list():
 def get_consignee_list_by_admin(data):
     where = '1 '
     if 'project_id' in data:
-        where += ' AND project_id = {data["project_id"]} '
+        where += f' AND project_id = {data["project_id"]} '
     if 'admin_id' in data:
-        where += ' AND checker_id = {data["admin_id"]} '
+        where += f' AND checker_id = {data["admin_id"]} '
 
     query = f'SELECT B.user_id, B.company_name, B.company_address, B.manager_name, B.manager_phone from'\
             f'(SELECT user_id FROM {PROJECT_DETAIL_TABLE} WHERE {where}) as A '\

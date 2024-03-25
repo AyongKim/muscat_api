@@ -282,7 +282,7 @@ class ConsigneeList(Resource):
         """프로젝트, 점검담당자에 의한 수탁사 목록"""
         request_data = request.json
 
-        essential_keys = ['admin_id', 'project_id']
+        essential_keys = ['project_id']
         check_response = utils.check_key_value_in_data_is_validate(data=request_data, keys=essential_keys)
         if check_response['result'] == FAIL_VALUE:
             return check_response
