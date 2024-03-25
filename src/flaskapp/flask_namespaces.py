@@ -379,13 +379,20 @@ personal_category_delete_model = PersonalCategoryNs.model('personal_category_del
 
 #####################################3333
 # 개인정보 항목 등록 모델
-personal_info_register_form = {
+personal_info_form = {
     'sequence': fields.Integer(required=True, description="순서"),
     'standard_grade': fields.String(required=True, description="기준 등급"),
     'intermediate_grade': fields.String(required=True, description="중간 등급"),
     'item': fields.String(required=True, description="항목 설명"),
     'merged1': fields.Integer(required=True, description="합병 필드 1"),
     'merged2': fields.Integer(required=True, description="합병 필드 2"),
+}
+
+personal_info_model = PersonalInfoNs.model('personal_info_model', personal_info_form)
+
+personal_info_register_form = {
+    'id': fields.Integer(),
+    'data': fields.List(fields.Nested(personal_info_model))
 }
 
 personal_info_register_model = PersonalInfoNs.model('personal_info_register_model', personal_info_register_form)

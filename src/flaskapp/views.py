@@ -121,6 +121,34 @@ class Login(Resource):
                     
         return res
 
+@UserNs.route('/SendCode')
+class Login(Resource):
+    @UserNs.response(200, 'SUCCESS', user_login_response_model)
+    def post(self):
+        """인증코드전송"""
+        login_data: dict = request.json
+        result = db_utils.check_login(login_data['email'])
+
+        update_data={}
+
+        res={}
+        if result == None:
+            new_code = ''.join(str(random.randrange(1, 10)) for i in range(0, 8))
+
+            try:
+                utils.send_mail(login_data['email'], '인증코드 발송', f'회원가입을 위한 인증정보입니다.\n아래의 인증번호를 입력하여 가입을 진행해주세요.\n인증코드: {new_code}')
+                res['result'] = 'success'
+                res['code'] = hashing_password(new_code)
+            except Exception:
+                res['result'] = 'fail'
+                res['error_message'] = '인증코드전송이 실패하였습니다.'            
+        else:
+            res['result'] = 'fail'
+            res['error_message'] = '존재하는 이메일입니다.'
+                    
+        return res
+
+
 @UserNs.route('/Signup')
 class Signup(Resource):
     @UserNs.expect(user_signup_request_model)
@@ -1084,7 +1112,7 @@ class PersonalInfoRegister(Resource):
         item_data = request.json
         
         # 유효성 검사 로직
-        필수_키 = ['sequence', 'standard_grade', 'intermediate_grade', 'item', 'merged1', 'merged2']
+        필수_키 = ['id', 'data']
         검사_결과 = utils.check_key_value_in_data_is_validate(data=item_data, keys=필수_키)
 
         if 검사_결과['result'] == 'FAIL':

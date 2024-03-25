@@ -449,17 +449,24 @@ def delete_personal_category(str_ids):
 
 #개인정보항목관리
 def register_personal_info_item(data):
-    sequence = data['sequence']
-    standard_grade = data['standard_grade']
-    intermediate_grade = data['intermediate_grade']
-    item = data['item']
-    categoryId = data['categoryId']  # Added categoryId
-    merged1 = data['merged1']
-    merged2 = data['merged2']
-    
-    query = f'INSERT INTO {PERSONAL_INFO_TABLE} (sequence, standard_grade, intermediate_grade, item, categoryId, merged1, merged2) '\
-            f'VALUES (%s, %s, %s, %s, %s, %s, %s)'
-    return execute_query(query, (sequence, standard_grade, intermediate_grade, item, categoryId, merged1, merged2))
+    category_id = data['id']
+    query = f'INSERT INTO {PERSONAL_INFO_TABLE} (sequence, standard_grade, intermediate_grade, item, merged1, merged2, category_id) VALUES '\
+
+    data_list=[]
+    for x in data["data"]:
+        sequence = x['sequence']
+        standard_grade = x['standard_grade']
+        intermediate_grade = x['intermediate_grade']
+        item = x['item']
+        merged1 = x['merged1']
+        merged2 = x['merged2']
+
+        data_list.append(f' ({sequence}, "{standard_grade}", "{intermediate_grade}", "{item}", {merged1}, {merged2}, {category_id})')
+
+    query += ",".join(data_list)
+            
+    print(query)
+    return execute_query(query, ())
 
 def get_personal_info_items_list(category_id):
     query = f'SELECT id, sequence, standard_grade, intermediate_grade, item, merged1, merged2 FROM {PERSONAL_INFO_TABLE} WHERE category_id = %s'
