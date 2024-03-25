@@ -131,7 +131,9 @@ def user_detail_by_id(id):
 
 def user_check_id(id):
     query = f'SELECT * FROM {USER_TABLE} ' \
-            f'WHERE nickname = {id}'
+            f'WHERE nickname = "{id}"'
+    
+    print(query)
     
     res = execute_query(query, ())
     return res[0] if res else None
