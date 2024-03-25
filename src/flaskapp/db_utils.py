@@ -58,7 +58,7 @@ def execute_query(base_query: str, var_tuple: tuple):
             return query_result
 
 def check_login(email):
-    query = f'SELECT user_email, user_type, code, updated_time, user_id, admin_name, nickname, user_password, try_count, lock_time FROM {USER_TABLE} ' \
+    query = f'SELECT user_email, user_type, code, updated_time, user_id, admin_name, nickname, user_password, try_count, lock_time, approval FROM {USER_TABLE} ' \
             f'WHERE user_email = %s'
     
     res = execute_query(query, (email))
@@ -149,8 +149,12 @@ def get_consignor_list():
     return data
 
 def get_project_detail(data):
+    where = ''
+    if 'admin_id' in data:
+        where = ' AND checker_id={data["admin_id"]}'
+
     query = f'SELECT id, create_date, self_check_date, imp_check_date, delay FROM {PROJECT_DETAIL_TABLE} '\
-            f'WHERE project_id={data["project_id"]} AND user_id={data["consignee_id"]} AND checker_id={data["admin_id"]}'
+            f'WHERE project_id={data["project_id"]} AND user_id={data["consignee_id"]} {where}'
 
     data = execute_query(query, ())
     return data
@@ -162,9 +166,14 @@ def get_consignee_list():
     return data
 
 def get_consignee_list_by_admin(data):
+    where = '1 '
+    if 'project_id' in data:
+        where += ' AND project_id = {data["project_id"]} '
+    if 'admin_id' in data:
+        where += ' AND checker_id = {data["admin_id"]} '
 
     query = f'SELECT B.user_id, B.company_name, B.company_address, B.manager_name, B.manager_phone from'\
-            f'(SELECT user_id FROM {PROJECT_DETAIL_TABLE} WHERE project_id = {data["project_id"]} AND checker_id = {data["admin_id"]}) as A '\
+            f'(SELECT user_id FROM {PROJECT_DETAIL_TABLE} WHERE {where}) as A '\
             f'LEFT JOIN (SELECT D.company_name, C.user_id, C.company_address, C.manager_name, C.manager_phone from {USER_TABLE} as C LEFT JOIN {COMPANY_TABLE} as D ON C.register_num = D.register_num) as B ON A.user_id = B.user_id'
 
     data = execute_query(query, ())
@@ -295,6 +304,23 @@ def get_projects_by_admin(data):
         f'WHERE checker_id={data["admin_id"]} '\
         f'GROUP BY project_id) as A '\
         f'LEFT JOIN {PROJECT_TABLE} as B ON A.project_id = B.id '\
+
+    data = execute_query(query, ())
+    return data
+
+def get_projects_by_consignee(data):
+    query = f'SELECT B.* FROM (SELECT project_id '\
+        f'FROM {PROJECT_DETAIL_TABLE} '\
+        f'WHERE user_id={data["consignee_id"]} '\
+        f'GROUP BY project_id) as A '\
+        f'LEFT JOIN {PROJECT_TABLE} as B ON A.project_id = B.id '\
+
+    data = execute_query(query, ())
+    return data
+
+def get_projects_by_consignor(data):
+    query = f'SELECT * FROM {PROJECT_TABLE} '\
+        f'WHERE user_id = {data["consignor_id"]}'\
 
     data = execute_query(query, ())
     return data
@@ -513,11 +539,17 @@ def update_project_detail(data):
         execute_query(query, tuple(data_list))
 
 def get_project_check_schedule(data):
+    where = ''
+    if 'admin_id' in data:
+        where = f' AND A.checker_id={data["admin_id"]}'
+    if 'consignee_id' in data:
+        where = f' AND A.user_id={data["consignee_id"]}'
     
-    query = f'SELECT A.check_schedule, A.id, A.user_id, A.checker_id, A.project_id, D.company_name '\
+    query = f'SELECT A.check_schedule, A.id, A.user_id, A.checker_id, A.project_id, D.company_name, E.admin_name '\
         f'FROM {PROJECT_DETAIL_TABLE} as A LEFT JOIN '\
         f'(SELECT B.user_id, C.company_name FROM {USER_TABLE} as B LEFT JOIN {COMPANY_TABLE} as C ON B.register_num = C.register_num) as D ON A.user_id = D.user_id '\
-        f' WHERE project_id={data["project_id"]} AND checker_id={data["admin_id"]}'
+        f'LEFT JOIN {USER_TABLE} as E ON A.checker_id = E.user_id '\
+        f' WHERE project_id={data["project_id"]} {where}'
 
     data = execute_query(query, ())
     return data
