@@ -239,7 +239,7 @@ class ConsignorList(Resource):
         """수탁사 프로젝트상세정보"""
         request_data = request.json
 
-        essential_keys = ['project_id', 'admin_id', 'consignee_id']
+        essential_keys = ['project_id', 'consignee_id']
         check_response = utils.check_key_value_in_data_is_validate(data=request_data, keys=essential_keys)
 
         if check_response['result'] == FAIL_VALUE:
@@ -642,6 +642,38 @@ class ProjectList(Resource):
 
         if 'admin_id' in search_data:
             result = db_utils.get_projects_by_admin(search_data)
+
+            data = [{
+                    'project_id': x[0], 
+                    'name': x[2],
+                    'consignor_id': x[3],
+                    'create_from': x[7].strftime('%Y-%m-%d'),
+                    'create_to': x[8].strftime('%Y-%m-%d'),
+                    'self_check_from': x[9].strftime('%Y-%m-%d'),
+                    'self_check_to': x[10].strftime('%Y-%m-%d'),
+                    'imp_check_from': x[11].strftime('%Y-%m-%d'),
+                    'imp_check_to': x[12].strftime('%Y-%m-%d'),
+                }
+            for x in result]
+            return data
+        elif 'consignee_id' in search_data:
+            result = db_utils.get_projects_by_consignee(search_data)
+
+            data = [{
+                    'project_id': x[0], 
+                    'name': x[2],
+                    'consignor_id': x[3],
+                    'create_from': x[7].strftime('%Y-%m-%d'),
+                    'create_to': x[8].strftime('%Y-%m-%d'),
+                    'self_check_from': x[9].strftime('%Y-%m-%d'),
+                    'self_check_to': x[10].strftime('%Y-%m-%d'),
+                    'imp_check_from': x[11].strftime('%Y-%m-%d'),
+                    'imp_check_to': x[12].strftime('%Y-%m-%d'),
+                }
+            for x in result]
+            return data
+        elif 'consignor_id' in search_data:
+            result = db_utils.get_projects_by_consignor(search_data)
 
             data = [{
                     'project_id': x[0], 
@@ -1218,7 +1250,7 @@ class ProjectDetailCheckSchedule(Resource):
         """프로젝트 수탁사현황목록"""
         search_data: dict = request.json
 
-        essential_keys = ['project_id', 'admin_id']
+        essential_keys = ['project_id']
         check_response = utils.check_key_value_in_data_is_validate(data=search_data, keys=essential_keys)
 
         if check_response['result'] == FAIL_VALUE:
@@ -1233,6 +1265,7 @@ class ProjectDetailCheckSchedule(Resource):
                 'checker_id': x[3],
                 'project_id': x[4],
                 'user_name': x[5],
+                'admin_name': x[6],
         }
         for x in result]
 
