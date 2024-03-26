@@ -501,6 +501,12 @@ def get_checklist_items():
     data = execute_query(query, ())
     return data
 
+def get_checklist_item(id):
+    query = f'SELECT checklist_item, description, created_date FROM {CHECKLIST_TABLE} WHERE id={id}'
+
+    data = execute_query(query, ())
+    return data[0] if data else None
+
 def delete_checklist_item(str_ids):
     query = f'DELETE FROM {CHECKLIST_TABLE} WHERE id in ({str_ids})'
 
@@ -563,3 +569,30 @@ def get_project_check_schedule(data):
 
     data = execute_query(query, ())
     return data
+
+def register_checklist_info_item(data):
+    query = f'DELETE FROM {CHECKLIST_INFO_TABLE} WHERE category_id={data["id"]}'
+    execute_query(query, ())
+
+    category_id = data['id']
+    query = f'INSERT INTO {CHECKLIST_INFO_TABLE} (sequence, area, domain, item, detail_item, description, attachment, merged1, merged2, category_id) VALUES '\
+
+    data_list=[]
+    for x in data["data"]:
+        data_list.append(f' ({x["sequence"]}, "{x["area"]}", "{x["domain"]}", "{x["item"]}", "{x["detail_item"]}", "{x["description"]}", "{x["attachment"]}", {x["merged1"]}, {x["merged2"]}, {category_id})')
+
+    query += ",".join(data_list)
+            
+    return execute_query(query, ())
+
+def get_checklist_info_items_list(category_id):
+    query = f'SELECT id, sequence, area, domain, item, detail_item, description, attachment, merged1, merged2 FROM {CHECKLIST_INFO_TABLE} WHERE category_id = %s ORDER BY sequence ASC'
+    data = execute_query(query, (category_id,))
+    return data
+
+def get_checklist_attachment(id):
+    query = f'SELECT B.created_date, A.attachment FROM {CHECKLIST_INFO_TABLE} as A LEFT JOIN {CHECKLIST_TABLE} as B ON A.category_id = B.id' \
+            f'WHERE A.id = %s'
+    
+    res = execute_query(query, (id))
+    return res[0] if res else None

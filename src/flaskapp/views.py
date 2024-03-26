@@ -1122,7 +1122,7 @@ class PersonalInfoRegister(Resource):
         item_data['created_date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
         결과 = db_utils.register_personal_info_item(item_data)
-        return {'id': 결과, 'result': '성공'}
+        return {'id': 결과, 'result': 'success'}
 
 @PersonalInfoNs.route('/List')
 class PersonalInfoListByCategory(Resource):
@@ -1336,3 +1336,79 @@ class CompanyUpdate(Resource):
         db_utils.update_project_detail(update_data)
         
         return SUCCESS_RESPONSE
+    
+
+#개인정보항목관리
+@ChecklistInfoNs.route('/Register')
+class ChecklistInfoRegister(Resource):
+    @ChecklistInfoNs.expect(checklist_info_register_model)
+    @ChecklistInfoNs.response(200, '성공', success_response_model)
+    @ChecklistInfoNs.response(400, '실패', fail_response_model)
+    def post(self):
+        """새로운 개인정보 항목 등록"""
+        print(request)
+        item_data = request.form.to_dict()
+        
+        # 유효성 검사 로직
+        필수_키 = ['id', 'data']
+        검사_결과 = utils.check_key_value_in_data_is_validate(data=item_data, keys=필수_키)
+
+        checklist = db_utils.get_checklist_item(item_data['id'])
+
+        if checklist == None:
+            return FAIL_RESPONSE
+
+        timestamp = checklist[2].strftime('%Y%m%d%H%M%S')
+        
+        if 'file' in request.files:
+            f = request.files['file'] 
+            file_len = len(f)
+
+            for i in range(file_len):
+                f[i].filename = html.unescape(f[i].filename)
+                if f[i].filename != '':
+                    os.makedirs('upload/checklist/' + timestamp)
+                    f[i].save('upload/checklist/' + timestamp + '/' + f[i].filename)
+
+        for x in item_data['data']:
+            if x["attachment"] == 0:
+                x["attachment"] = ''
+            else:
+                x["attachment"] = html.unescape(request.files['file'][x["attachment"]].filename)
+
+        if 검사_결과['result'] == 'FAIL':
+            return 검사_결과
+                
+        결과 = db_utils.register_checklist_info_item(item_data)
+        return {'id': 결과, 'result': 'success'}
+
+@ChecklistInfoNs.route('/List')
+class CheckInfoListByCategory(Resource):
+    @ChecklistInfoNs.expect(personal_info_category_list_request_model)
+    @ChecklistInfoNs.response(200, '성공', personal_info_list_model)
+    @ChecklistInfoNs.response(400, '실패')
+    def post(self):
+        """카테고리 ID에 의한 개인정보 항목 목록 조회"""
+        request_data = request.json
+        category_id = request_data.get('category_id')
+        
+        # 카테고리 ID를 이용한 개인정보 항목 목록 조회
+        결과 = db_utils.get_personal_info_items_list(category_id)
+        
+        if 결과 is None or len(결과) == 0:
+            return {'message': '해당 카테고리에 개인정보 항목이 없습니다.'}, 404
+        
+        return {'data': 결과}
+    
+@ChecklistInfoNs.route('/Attachment')
+class ChecklistAttachment(Resource):
+    def get(self):
+        """"""
+        id = request.args.get('id', '')
+
+        data = db_utils.get_checklist_attachment(id)
+
+        if data != None and data[1] != '':
+            return send_file('../upload/'+data[0].strftime('%Y%m%d%H%M%S')+'/' + data[1], as_attachment=True)
+        
+        return 'Not exist'

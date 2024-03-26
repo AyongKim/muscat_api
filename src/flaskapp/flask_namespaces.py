@@ -17,7 +17,7 @@ ChecklistNs = Namespace('checklist', path='/checklist', description='체크리�
 ChecklistInfoNs = Namespace('checkinfo', path='/checkinfo', description='체크리스트항목 API',decorators=[cross_origin()])
 
 
-namespaces = [UserNs, CompanyNs, ProjectNs, NoticeNs, ChecklistNs, InquiryNs, PersonalCategoryNs, PersonalInfoNs, ProjectDetailNs]
+namespaces = [UserNs, CompanyNs, ProjectNs, NoticeNs, ChecklistNs, InquiryNs, PersonalCategoryNs, PersonalInfoNs, ProjectDetailNs, ChecklistInfoNs]
 
 
 def _data_response_model(data_form, ns, model_name, list_form=False, data_key='data', sort_result=False):
@@ -571,3 +571,49 @@ project_detail_check_schedule_request_form = {
                         'project_id': fields.Integer()
                     }
 project_detail_check_schedule_request_model = ProjectDetailNs.model('project_detail_check_schedule_request_model', project_detail_check_schedule_request_form)
+
+
+checklist_info_form = {
+    'sequence': fields.Integer(),
+    'area': fields.String(),
+    'domain': fields.String(),
+    'item': fields.String(),
+    'detail_item': fields.String(),
+    'description': fields.String(),
+    'attachment': fields.String(),
+    'category_id': fields.Integer(),
+    'merged1': fields.Integer(),
+    'merged2': fields.Integer(),
+}
+
+checklist_info_model = ChecklistInfoNs.model('checklist_info_data_model', checklist_info_form)
+
+checklist_info_register_form = {
+    'id': fields.Integer(),
+    'data': fields.List(fields.Nested(checklist_info_model))
+}
+
+checklist_info_register_model = ChecklistInfoNs.model('checklist_info_register_model', checklist_info_register_form)
+
+checklist_info_data_form = {
+    'id': fields.Integer(),
+    'sequence': fields.Integer(),
+    'area': fields.String(),
+    'domain': fields.String(),
+    'item': fields.String(),
+    'detail_item': fields.String(),
+    'description': fields.String(),
+    'attachment': fields.String(),
+    'category_id': fields.Integer(),
+    'merged1': fields.Integer(),
+    'merged2': fields.Integer(),
+}
+
+checklist_info_data_model = ChecklistInfoNs.model('checklist_info_data_model', checklist_info_data_form)
+
+checklist_info_list_form = {
+    'data': fields.List(fields.Nested(checklist_info_data_model))
+}
+
+checklist_info_list_model = ChecklistInfoNs.model('checklist_info_list_model', checklist_info_list_form)
+
