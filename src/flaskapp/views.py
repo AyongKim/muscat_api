@@ -1135,12 +1135,22 @@ class PersonalInfoListByCategory(Resource):
         category_id = request_data.get('category_id')
         
         # 카테고리 ID를 이용한 개인정보 항목 목록 조회
-        결과 = db_utils.get_personal_info_items_list(category_id)
+        result = db_utils.get_personal_info_items_list(category_id)
         
-        if 결과 is None or len(결과) == 0:
+        if result is None or len(result) == 0:
             return {'message': '해당 카테고리에 개인정보 항목이 없습니다.'}, 404
         
-        return {'data': 결과}
+        data = [{
+                'id': x[0],
+                'schedule': x[1],
+                'standard_grade': x[2],
+                'intermediate_grade': x[3],
+                'item': x[4],
+                'merged1': x[5],
+                'merged2': x[6],
+        }
+        for x in result]
+        return data
 
 @PersonalInfoNs.route('/Delete')
 class PersonalInfoDelete(Resource):
@@ -1345,7 +1355,7 @@ class ChecklistInfoRegister(Resource):
     @ChecklistInfoNs.response(200, '성공', success_response_model)
     @ChecklistInfoNs.response(400, '실패', fail_response_model)
     def post(self):
-        """새로운 개인정보 항목 등록"""
+        """체크리스트항목 등록"""
         print(request)
         item_data = request.form.to_dict()
         
@@ -1388,7 +1398,7 @@ class CheckInfoListByCategory(Resource):
     @ChecklistInfoNs.response(200, '성공', personal_info_list_model)
     @ChecklistInfoNs.response(400, '실패')
     def post(self):
-        """카테고리 ID에 의한 개인정보 항목 목록 조회"""
+        """체크리스트항목 조회"""
         request_data = request.json
         category_id = request_data.get('category_id')
         
@@ -1403,7 +1413,7 @@ class CheckInfoListByCategory(Resource):
 @ChecklistInfoNs.route('/Attachment')
 class ChecklistAttachment(Resource):
     def get(self):
-        """"""
+        """체크리스트 첨부파일"""
         id = request.args.get('id', '')
 
         data = db_utils.get_checklist_attachment(id)
