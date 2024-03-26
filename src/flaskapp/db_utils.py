@@ -449,6 +449,9 @@ def delete_personal_category(str_ids):
 
 #개인정보항목관리
 def register_personal_info_item(data):
+    query = f'DELETE FROM {PERSONAL_INFO_TABLE} WHERE category_id={data["id"]}'
+    execute_query(query, ())
+
     category_id = data['id']
     query = f'INSERT INTO {PERSONAL_INFO_TABLE} (sequence, standard_grade, intermediate_grade, item, merged1, merged2, category_id) VALUES '\
 
@@ -465,11 +468,10 @@ def register_personal_info_item(data):
 
     query += ",".join(data_list)
             
-    print(query)
     return execute_query(query, ())
 
 def get_personal_info_items_list(category_id):
-    query = f'SELECT id, sequence, standard_grade, intermediate_grade, item, merged1, merged2 FROM {PERSONAL_INFO_TABLE} WHERE category_id = %s'
+    query = f'SELECT id, sequence, standard_grade, intermediate_grade, item, merged1, merged2 FROM {PERSONAL_INFO_TABLE} WHERE category_id = %s ORDER BY sequence ASC'
     data = execute_query(query, (category_id,))
     return data
 

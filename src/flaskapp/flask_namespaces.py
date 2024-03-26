@@ -14,6 +14,7 @@ InquiryNs = Namespace('inquiry', path='/inquiry', description='문의 API',decor
 PersonalCategoryNs = Namespace('personal_category', path='/personal_category', description='개인정보취급분류 API',decorators=[cross_origin()])
 PersonalInfoNs = Namespace('personal_info', path='/personal_info', description='개인정보항목관리', decorators=[cross_origin()] )
 ChecklistNs = Namespace('checklist', path='/checklist', description='체크리스트 API',decorators=[cross_origin()])
+ChecklistInfoNs = Namespace('checkinfo', path='/checkinfo', description='체크리스트항목 API',decorators=[cross_origin()])
 
 
 namespaces = [UserNs, CompanyNs, ProjectNs, NoticeNs, ChecklistNs, InquiryNs, PersonalCategoryNs, PersonalInfoNs, ProjectDetailNs]
