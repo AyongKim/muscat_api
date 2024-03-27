@@ -1582,7 +1582,7 @@ class CheckInfoListByCategory(Resource):
                 'item': x[4],
                 'detail_item': x[5],
                 'description': x[6],
-                'attachment': x[7],
+                'filename': x[7],
                 'merged1': x[8],
                 'merged2': x[9],
         }
