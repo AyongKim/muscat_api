@@ -43,6 +43,7 @@ def execute_query(base_query: str, var_tuple: tuple):
             query = cursor.mogrify(base_query, var_tuple)
 
         cursor.execute(query)
+        
 
         insert_id = cursor.lastrowid
 
@@ -106,7 +107,6 @@ def update_user(data):
     if 'user_password' in data:
         data['user_password'] = hashing_password(data['user_password'])
 
-    print(data)
     for k, v in data.items():
         if k in ['user_email', 'user_password', 'company_address', 'manager_name', 'manager_phone', 'manager_depart', 'manager_grade', 'other', 'approval', 'nickname', 'admin_name', 'admin_phone', 'code', 'updated_time', 'access_time', 'try_count', 'lock_time']:
             update_list.append(f'{k} = %s')
@@ -133,7 +133,6 @@ def user_check_id(id):
     query = f'SELECT * FROM {USER_TABLE} ' \
             f'WHERE nickname = "{id}"'
     
-    print(query)
     
     res = execute_query(query, ())
     return res[0] if res else None
@@ -156,11 +155,18 @@ def get_project_detail(data):
         where += f' AND checker_id={data["admin_id"]}'
     if 'company_id' in data:
         where += f' AND company_id={data["company_id"]}'
+    if 'consignee_id' in data:
+        result = get_company_by_user(data['consignee_id'])
+
+        if result == None:
+            return FAIL_RESPONSE
+        
+        data['company_id'] = result[0]
+        where = f' AND company_id={data["company_id"]}'
 
     query = f'SELECT id, create_date, self_check_date, imp_check_date, delay FROM {PROJECT_DETAIL_TABLE} '\
             f'WHERE project_id={data["project_id"]} {where}'
 
-    print(query)
     data = execute_query(query, ())
     return data
 
@@ -567,6 +573,27 @@ def get_project_detail_list(data):
 
     data = execute_query(query, ())
     return data
+
+def get_project_detail_status(data):
+    where = " 1 "
+    if 'project_id' in data:
+        where += f' AND project_id={data["project_id"]}'
+    if 'consignee_id' in data:
+        result = get_company_by_user(data['consignee_id'])
+
+        if result == None:
+            return FAIL_RESPONSE
+        
+        data['company_id'] = result[0]
+        where += f' AND company_id={data["company_id"]}'
+
+    query = f'SELECT status '\
+        f'FROM {PROJECT_DETAIL_TABLE} '\
+        f'WHERE {where}'
+
+    print(query)
+    data = execute_query(query, ())
+    return data[0] if data else None
 
 def delete_project_detail(str_ids):
     query = f'DELETE FROM {PROJECT_DETAIL_TABLE} WHERE id in ({str_ids})'

@@ -268,7 +268,7 @@ class ConsignorList(Resource):
         """수탁사 프로젝트상세정보"""
         request_data = request.json
 
-        essential_keys = ['project_id', 'company_id']
+        essential_keys = ['project_id']
         check_response = utils.check_key_value_in_data_is_validate(data=request_data, keys=essential_keys)
 
         if check_response['result'] == FAIL_VALUE:
@@ -420,7 +420,7 @@ class UserDetail(Resource):
                     "admin_name": x[14],
                     "admin_phone": x[15],
                     "access_time": x[18].strftime('%Y-%m-%d %H:%M:%S'),
-                    "company_name": x[19]
+                    "company_name": x[21]
                 }
             return data
         else:
@@ -1403,6 +1403,25 @@ class ProjectDetailList(Resource):
         for x in result]
             
         return data
+    
+@ProjectDetailNs.route('/Status')
+class ProjectDetailStatus(Resource):
+    @ProjectDetailNs.expect(project_detail_request_model)
+    @UserNs.response(200, 'SUCCESS', project_detail_list_model)
+    @UserNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """프로젝트 수탁사현황조회"""
+        search_data: dict = request.json
+
+        essential_keys = ['project_id', 'consignee_id']
+        check_response = utils.check_key_value_in_data_is_validate(data=search_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        result = db_utils.get_project_detail_status(search_data)
+            
+        return result[0]
 
 @ProjectDetailNs.route('/CheckSchedule')
 class ProjectDetailCheckSchedule(Resource):
@@ -1496,20 +1515,20 @@ class ChecklistInfoRegister(Resource):
         timestamp = checklist[2].strftime('%Y%m%d%H%M%S')
         
         if 'file' in request.files:
-            f = request.files['file'] 
-            file_len = len(f)
+            file_len = len(request.files)
 
             for i in range(file_len):
-                f[i].filename = html.unescape(f[i].filename)
-                if f[i].filename != '':
+                f = request.files['file' + str(i+1)] 
+                f.filename = html.unescape(f.filename)
+                if f.filename != '':
                     os.makedirs('upload/checklist/' + timestamp)
-                    f[i].save('upload/checklist/' + timestamp + '/' + f[i].filename)
+                    f.save('upload/checklist/' + timestamp + '/' + f.filename)
 
         for x in item_data['data']:
             if x["attachment"] == 0:
                 x["attachment"] = ''
             else:
-                x["attachment"] = html.unescape(request.files['file'][x["attachment"]].filename)
+                x["attachment"] = html.unescape(request.files['file' + x["attachment"]].filename)
 
         if 검사_결과['result'] == 'FAIL':
             return 검사_결과
