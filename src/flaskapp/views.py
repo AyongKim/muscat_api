@@ -23,6 +23,7 @@ from flaskapp.constants import *
 from flaskapp.enums import *
 import html
 import hashlib
+import json
 
 
 def hashing_password(passwd):
@@ -1524,6 +1525,7 @@ class ChecklistInfoRegister(Resource):
                     os.makedirs('upload/checklist/' + timestamp)
                     f.save('upload/checklist/' + timestamp + '/' + f.filename)
 
+        item_data['data'] = json.load(item_data['data'])
         for x in item_data['data']:
             if x["attachment"] == 0:
                 x["attachment"] = ''
