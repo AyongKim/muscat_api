@@ -1550,12 +1550,26 @@ class CheckInfoListByCategory(Resource):
         category_id = request_data.get('category_id')
         
         # 카테고리 ID를 이용한 개인정보 항목 목록 조회
-        결과 = db_utils.get_personal_info_items_list(category_id, 0)
+        result = db_utils.get_personal_info_items_list(category_id, 0)
         
-        if 결과 is None or len(결과) == 0:
+        if result is None or len(result) == 0:
             return {'message': '해당 카테고리에 개인정보 항목이 없습니다.'}, 404
         
-        return {'data': 결과}
+        data = [{
+                'id': x[0],
+                'sequence': x[1],
+                'area': x[2],
+                'domain': x[3],
+                'item': x[4],
+                'detail_item': x[5],
+                'description': x[6],
+                'attachment': x[7],
+                'category_id': x[8],
+                'merged1': x[9],
+                'merged2': x[10],
+        }
+        for x in result]
+        return data
     
 @ChecklistInfoNs.route('/Attachment')
 class ChecklistAttachment(Resource):
