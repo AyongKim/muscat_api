@@ -5,6 +5,7 @@ import string
 import uuid
 import requests
 import os
+import openpyxl
 from datetime import datetime
 from pytz import timezone
 from werkzeug.exceptions import BadRequest
@@ -267,13 +268,15 @@ class ConsignorList(Resource):
         """수탁사 프로젝트상세정보"""
         request_data = request.json
 
-        essential_keys = ['project_id', 'consignee_id']
+        essential_keys = ['project_id', 'company_id']
         check_response = utils.check_key_value_in_data_is_validate(data=request_data, keys=essential_keys)
 
         if check_response['result'] == FAIL_VALUE:
             return check_response
         
         result = db_utils.get_project_detail(request_data)
+        if result == FAIL_RESPONSE:
+            return FAIL_RESPONSE
 
         x = result[0]
         data = {
@@ -318,7 +321,7 @@ class ConsigneeList(Resource):
         result = db_utils.get_consignee_list_by_admin(request_data)
 
         data = [{
-                "user_id": x[0],
+                "company_id": x[0],
                 'name': x[1],
                 'company_address': x[2],
                 'manager_name': x[3],
@@ -334,11 +337,11 @@ class ConsigneeList(Resource):
     @UserNs.response(400, 'FAIL', fail_response_model)
     def post(self):
         """수탁사 목록"""
-        result = db_utils.get_consignee_list()
+        result = db_utils.get_company_list()
 
-        consignee = [{
-                "user_id": x[0],
-                'name': x[1],
+        company = [{
+                "id": x[0],
+                'name': x[2],
             }
         for x in result]
 
@@ -350,7 +353,7 @@ class ConsigneeList(Resource):
             }
         for x in result]
             
-        return {'consignee': consignee, 'admin': admin}
+        return {'company': company, 'admin': admin}
 
 @UserNs.route('/ApprovalList')
 class UserApprovalList(Resource):
@@ -592,9 +595,8 @@ class ProjectRegister(Resource):
     def post(self):
         """프로젝트 등록"""
         register_data: dict = request.json
-        print(register_data)
         
-        essential_keys = ['year', 'name', 'user_id', 'checklist_id', 'privacy_type']
+        essential_keys = ['year', 'name', 'company_id', 'checklist_id', 'privacy_type']
         check_response = utils.check_key_value_in_data_is_validate(data=register_data, keys=essential_keys)
 
         if check_response['result'] == FAIL_VALUE:
@@ -685,6 +687,13 @@ class ProjectList(Resource):
             for x in result]
             return data
         elif 'consignee_id' in search_data:
+            result = db_utils.get_company_by_user(search_data['consignee_id'])
+
+            if result == None:
+                return FAIL_RESPONSE
+            
+            search_data['company_id'] = result[0]
+
             result = db_utils.get_projects_by_consignee(search_data)
 
             data = [{
@@ -701,6 +710,12 @@ class ProjectList(Resource):
             for x in result]
             return data
         elif 'consignor_id' in search_data:
+            result = db_utils.get_company_by_user(search_data['consignor_id'])
+
+            if result == None:
+                return FAIL_RESPONSE
+            
+            search_data['company_id'] = result[0]
             result = db_utils.get_projects_by_consignor(search_data)
 
             data = [{
@@ -723,10 +738,9 @@ class ProjectList(Resource):
                     'id': x[0], 
                     'year': x[1],
                     'name': x[2],
-                    'user_id': x[3],
+                    'company_name': x[3],
                     'checklist_id': x[4],
                     'privacy_type': x[5],
-                    'checker': x[6] + x[7]
                 }
             for x in result]
             return data
@@ -1142,7 +1156,7 @@ class PersonalInfoListByCategory(Resource):
         
         data = [{
                 'id': x[0],
-                'schedule': x[1],
+                'sequence': x[1],
                 'standard_grade': x[2],
                 'intermediate_grade': x[3],
                 'item': x[4],
@@ -1233,9 +1247,8 @@ class ProjectDetailRegister(Resource):
     def post(self):
         """프로젝트 수탁사등록"""
         register_data: dict = request.json
-        print(register_data)
         
-        essential_keys = ['project_id', 'user_id', 'work_name', 'checker_id', 'check_type']
+        essential_keys = ['project_id', 'company_id', 'work_name', 'checker_id', 'check_type']
         check_response = utils.check_key_value_in_data_is_validate(data=register_data, keys=essential_keys)
 
         if check_response['result'] == FAIL_VALUE:
@@ -1246,6 +1259,119 @@ class ProjectDetailRegister(Resource):
         res['result'] = SUCCESS_VALUE
         
         return res
+
+@ProjectDetailNs.route('/RegisterExcel')
+class ProjectDetailRegister(Resource):
+    @ProjectDetailNs.expect(project_detail_register_request_model)
+    @ProjectDetailNs.response(200, 'SUCCESS', success_response_model)
+    @ProjectDetailNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """프로젝트 수탁사 엑섹등록"""
+        request_data = request.form.to_dict()
+        essential_keys = ['project_id']
+        check_response = utils.check_key_value_in_data_is_validate(data=request_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response 
+
+        company_list = db_utils.get_company_list()
+        consignee_list = db_utils.get_project_detail_list(request_data)
+        admin_list = db_utils.get_admin_list()
+
+        consignees = []
+        for x in consignee_list:
+            consignees.append(x[1])
+
+        f = request.files['file'] 
+        if f.filename != '':
+            f.save('test.xlsx')
+            file_path = 'test.xlsx'
+            wb = openpyxl.load_workbook(file_path, data_only=True)
+            sheet_name = wb.sheetnames[0]
+            ws = wb[sheet_name]
+
+            max_rows = ws.max_row
+            start_row = 2
+            last_row = max_rows
+
+            error_list=[]
+            data_list=[]
+            for i in range(start_row, last_row + 1):
+                register_num_cell = ws.cell(row=i, column=1).value
+                company_name_cell = ws.cell(row=i, column=2).value
+                work_cell = ws.cell(row=i, column=3).value
+                checker_cell = ws.cell(row=i, column=4).value
+                check_type_cell = ws.cell(row=i, column=5).value
+
+                if not register_num_cell:
+                    error_list.append(str(i) + '번째 행의 사업자등록번호를 입력하세요.')
+
+                if not company_name_cell:
+                    error_list.append(str(i) + '번째 행의 업체명을 입력하세요.')
+
+                if not work_cell:
+                    error_list.append(str(i) + '번째 행의 위탁 업무를 입력하세요.')
+
+                if not checker_cell:
+                    error_list.append(str(i) + '번째 행의 점검 담당자를 입력하세요.')
+
+                if not check_type_cell:
+                    error_list.append(str(i) + '번째 행의 점검방식을 입력하세요.')
+
+                company_id = 0
+                for x in company_list:
+                    if x[1] == register_num_cell and x[2] == company_name_cell:
+                        company_id = x[0]
+
+                if company_id == 0:
+                    error_list.append(str(i) + '번째 행의 수탁사가 등록되지 않은 업체입니다.')
+                else:
+                    try:
+                        consignees.index(company_id)
+                        error_list.append(str(i) + '번째 행의 수탁사업체가 중복됩니다.')
+                    except ValueError:
+                        consignees.append(company_id)
+
+                admin_id = 0
+                for x in admin_list:
+                    if x[1] == checker_cell:
+                        admin_id = x[0]
+
+                if admin_id == 0:
+                    error_list.append(str(i) + '번째 행의 점검 담당자가 등록되지 않았습니다.')
+
+                check_type = -1
+                if check_type_cell == '서면':
+                    check_type = 0
+                elif check_type_cell == '현장':
+                    check_type = 1
+                elif check_type_cell != '':
+                    error_list.append(str(i) + '번째 행의 점검방식을 정확히 입력하세요.')
+
+                data = {
+                    'project_id': request_data['project_id'],
+                    'company_id': company_id,
+                    'work_name': work_cell,
+                    'checker_id': admin_id,
+                    'check_type': check_type
+                }
+                data_list.append(data)
+            
+            if len(error_list):
+                return {
+                    'result': 'FAIL',
+                    'reason': '\n'.join(error_list)
+                }
+            else:
+                db_utils.register_project_detail_multi(data_list)
+                return {
+                    'result': 'SUCCESS'
+                }
+            
+        return {
+            'result': 'FAIL',
+            'reason': '선택된 파일이 없습니다.'
+        }
 
 
 @ProjectDetailNs.route('/List')
@@ -1267,8 +1393,8 @@ class ProjectDetailList(Resource):
 
         data = [{
                 'id': x[0], 
-                'user_id': x[1], 
-                'user_name': x[2], 
+                'company_id': x[1], 
+                'company_name': x[2], 
                 'work_name': x[3], 
                 'checker_id': x[4] ,
                 'checker_name': x[5] ,
@@ -1276,7 +1402,6 @@ class ProjectDetailList(Resource):
             }
         for x in result]
             
-        print(result)
         return data
 
 @ProjectDetailNs.route('/CheckSchedule')
@@ -1299,7 +1424,7 @@ class ProjectDetailCheckSchedule(Resource):
         data = [{
                 'check_schedule': x[0],
                 'id': x[1],
-                'user_id': x[2],
+                'company_id': x[2],
                 'checker_id': x[3],
                 'project_id': x[4],
                 'user_name': x[5],
