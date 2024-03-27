@@ -76,6 +76,7 @@ class Login(Resource):
                                     res['userData']['name'] = result[5]
                                 else:
                                     res['userData']['name'] = result[6]            
+                                res['userData']['company_name'] = result[11]
                                 
                                 update_data['code'] = ''
                                 update_data['access_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -95,6 +96,7 @@ class Login(Resource):
                             res['userData']['name'] = result[5]
                         else:
                             res['userData']['name'] = result[6]
+                        res['userData']['company_name'] = result[11]
 
                         new_code = ''.join(str(random.randrange(1, 10)) for i in range(0, 8))
 
@@ -1550,7 +1552,7 @@ class CheckInfoListByCategory(Resource):
         category_id = request_data.get('category_id')
         
         # 카테고리 ID를 이용한 개인정보 항목 목록 조회
-        result = db_utils.get_personal_info_items_list(category_id, 0)
+        result = db_utils.get_checklist_info_items_list(category_id)
         
         if result is None or len(result) == 0:
             return {'message': '해당 카테고리에 개인정보 항목이 없습니다.'}, 404

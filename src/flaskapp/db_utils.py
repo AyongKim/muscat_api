@@ -59,8 +59,9 @@ def execute_query(base_query: str, var_tuple: tuple):
             return query_result
 
 def check_login(email):
-    query = f'SELECT user_email, user_type, code, updated_time, user_id, admin_name, nickname, user_password, try_count, lock_time, approval FROM {USER_TABLE} ' \
-            f'WHERE user_email = %s'
+    query = f'SELECT user_email, user_type, code, updated_time, user_id, admin_name, nickname, user_password, try_count, lock_time, approval, B.company_name FROM {USER_TABLE} as A' \
+            f' LEFT JOIN {COMPANY_TABLE} as B ON A.register_num = B.register_num'\
+            f' WHERE user_email = %s'
     
     res = execute_query(query, (email))
     return res[0] if res else None
@@ -499,7 +500,12 @@ def get_personal_info_items_list(category_id, project_id):
         data = execute_query(query, ())
         category_id = data[0][0]
 
-    query = f'SELECT id, sequence, area, domain, item, detail_item, description, attachment, category_id, merged1, merged2 FROM {PERSONAL_INFO_TABLE} WHERE category_id = %s ORDER BY sequence ASC'
+    query = f'SELECT id, sequence, standard_grade, intermediate_grade, item, merged1, merged2 FROM {PERSONAL_INFO_TABLE} WHERE category_id = %s ORDER BY sequence ASC'
+    data = execute_query(query, (category_id,))
+    return data
+
+def get_checklist_info_items_list(category_id):
+    query = f'SELECT id, sequence, area, domain, item, detail_item, description, attachment, category_id, merged1, merged2 FROM {CHECKLIST_INFO_TABLE} WHERE category_id = %s ORDER BY sequence ASC'
     data = execute_query(query, (category_id,))
     return data
 
