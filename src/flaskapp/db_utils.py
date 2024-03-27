@@ -59,7 +59,7 @@ def execute_query(base_query: str, var_tuple: tuple):
             return query_result
 
 def check_login(email):
-    query = f'SELECT user_email, user_type, code, updated_time, user_id, admin_name, nickname, user_password, try_count, lock_time, approval, B.company_name FROM {USER_TABLE} as A' \
+    query = f'SELECT user_email, user_type, code, updated_time, user_id, admin_name, nickname, user_password, try_count, lock_time, approval, B.company_name, B.id FROM {USER_TABLE} as A' \
             f' LEFT JOIN {COMPANY_TABLE} as B ON A.register_num = B.register_num'\
             f' WHERE user_email = %s'
     
@@ -673,3 +673,8 @@ def get_checklist_attachment(id):
     
     res = execute_query(query, (id))
     return res[0] if res else None
+
+def update_project_detail_status(data):
+    query = f'UPDATE {PROJECT_DETAIL_TABLE} SET status=%s WHERE project_id = {data["project_id"]} AND company_id = {data["company_id"]}'
+    
+    execute_query(query, (data['status']))

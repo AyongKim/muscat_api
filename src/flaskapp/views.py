@@ -77,6 +77,7 @@ class Login(Resource):
                                 else:
                                     res['userData']['name'] = result[6]            
                                 res['userData']['company_name'] = result[11]
+                                res['userData']['company_id'] = result[12]
                                 
                                 update_data['code'] = ''
                                 update_data['access_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -97,6 +98,7 @@ class Login(Resource):
                         else:
                             res['userData']['name'] = result[6]
                         res['userData']['company_name'] = result[11]
+                        res['userData']['company_id'] = result[12]
 
                         new_code = ''.join(str(random.randrange(1, 10)) for i in range(0, 8))
 
@@ -1426,6 +1428,25 @@ class ProjectDetailStatus(Resource):
         result = db_utils.get_project_detail_status(search_data)
             
         return result[0]
+
+@ProjectDetailNs.route('/SetStatus')
+class ProjectDetailSetStatus(Resource):
+    @ProjectDetailNs.expect(project_detail_request_model)
+    @UserNs.response(200, 'SUCCESS', project_detail_list_model)
+    @UserNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """프로젝트 수탁사현황조회"""
+        search_data: dict = request.json
+
+        essential_keys = ['project_id', 'company_id', 'status']
+        check_response = utils.check_key_value_in_data_is_validate(data=search_data, keys=essential_keys)
+
+        if check_response['result'] == FAIL_VALUE:
+            return check_response
+        
+        result = db_utils.update_project_detail_status(search_data)
+            
+        return SUCCESS_RESPONSE
 
 @ProjectDetailNs.route('/CheckSchedule')
 class ProjectDetailCheckSchedule(Resource):
