@@ -1531,7 +1531,7 @@ class ChecklistInfoRegister(Resource):
             if x["attachment"] == 0:
                 x["attachment"] = ''
             else:
-                x["attachment"] = html.unescape(request.files['file' + x["attachment"]].filename)
+                x["attachment"] = html.unescape(request.files['file' + str(x["attachment"])].filename)
 
         if 검사_결과['result'] == 'FAIL':
             return 검사_결과
@@ -1550,7 +1550,7 @@ class CheckInfoListByCategory(Resource):
         category_id = request_data.get('category_id')
         
         # 카테고리 ID를 이용한 개인정보 항목 목록 조회
-        결과 = db_utils.get_personal_info_items_list(category_id)
+        결과 = db_utils.get_personal_info_items_list(category_id, 0)
         
         if 결과 is None or len(결과) == 0:
             return {'message': '해당 카테고리에 개인정보 항목이 없습니다.'}, 404
