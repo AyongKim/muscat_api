@@ -1539,22 +1539,18 @@ class ChecklistInfoRegister(Resource):
 
         timestamp = checklist[2].strftime('%Y%m%d%H%M%S')
         
-        if 'file' in request.files:
-            file_len = len(request.files)
+        file_len = len(request.files)
 
-            for i in range(file_len):
-                f = request.files['file' + str(i+1)] 
-                f.filename = html.unescape(f.filename)
-                if f.filename != '':
-                    os.makedirs('upload/checklist/' + timestamp)
-                    f.save('upload/checklist/' + timestamp + '/' + f.filename)
+        for i in range(file_len):
+            f = request.files['file' + str(i+1)] 
+            f.filename = html.unescape(f.filename)
+            if f.filename != '':
+                os.makedirs('upload/checklist/' + timestamp)
+                f.save('upload/checklist/' + timestamp + '/' + f.filename)
 
         item_data['data'] = json.loads(item_data['data'])
         for x in item_data['data']:
-            if x["attachment"] == 0:
-                x["attachment"] = ''
-            else:
-                x["attachment"] = html.unescape(request.files['file' + str(x["attachment"])].filename)
+            x["attachment"] = html.unescape(x['filename'])
 
         if 검사_결과['result'] == 'FAIL':
             return 검사_결과
