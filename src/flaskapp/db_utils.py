@@ -493,7 +493,12 @@ def register_personal_info_item(data):
             
     return execute_query(query, ())
 
-def get_personal_info_items_list(category_id):
+def get_personal_info_items_list(category_id, project_id):
+    if project_id:
+        query = f'SELECT privacy_type FROM {PROJECT_TABLE} WHERE id={project_id}'
+        data = execute_query(query, ())
+        category_id = data[0][0]
+
     query = f'SELECT id, sequence, standard_grade, intermediate_grade, item, merged1, merged2 FROM {PERSONAL_INFO_TABLE} WHERE category_id = %s ORDER BY sequence ASC'
     data = execute_query(query, (category_id,))
     return data

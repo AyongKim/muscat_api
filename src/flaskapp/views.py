@@ -1147,10 +1147,11 @@ class PersonalInfoListByCategory(Resource):
     def post(self):
         """카테고리 ID에 의한 개인정보 항목 목록 조회"""
         request_data = request.json
+        project_id = request_data.get('project_id')
         category_id = request_data.get('category_id')
         
         # 카테고리 ID를 이용한 개인정보 항목 목록 조회
-        result = db_utils.get_personal_info_items_list(category_id)
+        result = db_utils.get_personal_info_items_list(category_id, project_id)
         
         if result is None or len(result) == 0:
             return {'message': '해당 카테고리에 개인정보 항목이 없습니다.'}, 404
@@ -1525,7 +1526,7 @@ class ChecklistInfoRegister(Resource):
                     os.makedirs('upload/checklist/' + timestamp)
                     f.save('upload/checklist/' + timestamp + '/' + f.filename)
 
-        item_data['data'] = json.load(item_data['data'])
+        item_data['data'] = json.loads(item_data['data'])
         for x in item_data['data']:
             if x["attachment"] == 0:
                 x["attachment"] = ''
