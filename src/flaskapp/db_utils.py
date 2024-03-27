@@ -499,7 +499,7 @@ def get_personal_info_items_list(category_id, project_id):
         data = execute_query(query, ())
         category_id = data[0][0]
 
-    query = f'SELECT id, sequence, standard_grade, intermediate_grade, item, merged1, merged2 FROM {PERSONAL_INFO_TABLE} WHERE category_id = %s ORDER BY sequence ASC'
+    query = f'SELECT id, sequence, area, domain, item, detail_item, description, attachment, category_id, merged1, merged2 FROM {PERSONAL_INFO_TABLE} WHERE category_id = %s ORDER BY sequence ASC'
     data = execute_query(query, (category_id,))
     return data
 
