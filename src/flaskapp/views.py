@@ -1566,9 +1566,8 @@ class CheckInfoListByCategory(Resource):
                 'detail_item': x[5],
                 'description': x[6],
                 'attachment': x[7],
-                'category_id': x[8],
-                'merged1': x[9],
-                'merged2': x[10],
+                'merged1': x[8],
+                'merged2': x[9],
         }
         for x in result]
         return data
