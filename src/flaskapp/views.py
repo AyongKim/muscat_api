@@ -1545,7 +1545,8 @@ class ChecklistInfoRegister(Resource):
             f = request.files['file' + str(i+1)] 
             f.filename = html.unescape(f.filename)
             if f.filename != '':
-                os.makedirs('upload/checklist/' + timestamp)
+                if not os.path.exists('upload/checklist/' + timestamp):
+                    os.makedirs('upload/checklist/' + timestamp)
                 f.save('upload/checklist/' + timestamp + '/' + f.filename)
 
         item_data['data'] = json.loads(item_data['data'])
