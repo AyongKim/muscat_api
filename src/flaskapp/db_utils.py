@@ -124,7 +124,7 @@ def delete_user(str_ids):
     execute_query(query, ())
 
 def user_detail_by_id(id):
-    query = f'SELECT A.*, B.company_name FROM {USER_TABLE} as A LEFT JOIN {COMPANY_TABLE} as B ON A.register_num = B.register_num ' \
+    query = f'SELECT B.company_name,A.* FROM {USER_TABLE} as A LEFT JOIN {COMPANY_TABLE} as B ON A.register_num = B.register_num ' \
             f'WHERE user_id = "{id}"'
     
     res = execute_query(query, ())

@@ -410,22 +410,22 @@ class UserDetail(Resource):
         if result != None:
             x = result
             data = {
-                    "user_id": x[0],
-                    "user_email": x[1],
-                    "user_type": x[3],
-                    "register_num": x[5],
-                    "company_address": x[6],
-                    "manager_name": x[7],
-                    "manager_phone": x[8],
-                    "manager_depart": x[9],
-                    "manager_grade": x[10],
-                    "other": x[11],
-                    "approval": x[12],
-                    "id": x[13],
-                    "admin_name": x[14],
-                    "admin_phone": x[15],
-                    "access_time": x[18].strftime('%Y-%m-%d %H:%M:%S'),
-                    "company_name": x[21]
+                    "user_id": x[1],
+                    "user_email": x[2],
+                    "user_type": x[4],
+                    "register_num": x[6],
+                    "company_address": x[7],
+                    "manager_name": x[8],
+                    "manager_phone": x[9],
+                    "manager_depart": x[10],
+                    "manager_grade": x[11],
+                    "other": x[12],
+                    "approval": x[13],
+                    "id": x[14],
+                    "admin_name": x[15],
+                    "admin_phone": x[16],
+                    "access_time": x[19].strftime('%Y-%m-%d %H:%M:%S'),
+                    "company_name": x[0]
                 }
             return data
         else:
