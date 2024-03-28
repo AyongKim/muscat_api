@@ -139,7 +139,7 @@ def user_check_id(id):
     return res[0] if res else None
 
 def get_user_list():
-    query = f'SELECT * FROM {USER_TABLE} WHERE user_type < 3'
+    query = f'SELECT B.company_name, A.* FROM {USER_TABLE} as A LEFT JOIN {COMPANY_TABLE} as B ON A.register_num = B.register_num WHERE user_type < 3'
 
     data = execute_query(query, ())
     return data
