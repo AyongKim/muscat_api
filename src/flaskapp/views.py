@@ -1261,6 +1261,14 @@ class ProjectDetailRegister(Resource):
         if check_response['result'] == FAIL_VALUE:
             return check_response
         
+        result = db_utils.check_project_detail_duplication(register_data['project_id'], register_data['company_id'])
+
+        if result:
+            return {
+                'result': 'FAIL',
+                'error_message': '등록되어있는 수탁사입니다.'
+            }
+
         res = {}
         res['id'] = db_utils.register_project_detail(register_data)
         res['result'] = SUCCESS_VALUE
@@ -1512,6 +1520,14 @@ class CompanyUpdate(Resource):
 
         if check_response['result'] == FAIL_VALUE:
             return check_response
+
+        if 'project_id' in update_data and 'company_id' in update_data:
+            result = db_utils.check_project_detail_duplication(update_data['project_id'], update_data['company_id'], update_data['id'])
+            if result:
+                return {
+                    'result': 'FAIL',
+                    'error_message': '수탁사가 중복됩니다.'
+                }
         
         db_utils.update_project_detail(update_data)
         

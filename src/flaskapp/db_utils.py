@@ -639,10 +639,10 @@ def get_project_check_schedule(data):
         where = f' AND A.company_id={data["company_id"]}'
     
     query = f'SELECT A.check_schedule, A.id, A.company_id, A.checker_id, A.project_id, D.company_name, E.admin_name '\
-        f'FROM {PROJECT_DETAIL_TABLE} as A LEFT JOIN '\
-        f'(SELECT C.id as company_id, C.company_name FROM {USER_TABLE} as B LEFT JOIN {COMPANY_TABLE} as C ON B.register_num = C.register_num WHERE B.user_type = 1) as D ON A.company_id = D.company_id '\
+        f'FROM {PROJECT_DETAIL_TABLE} as A '\
+        f'LEFT JOIN {COMPANY_TABLE} as D ON A.company_id = D.id '\
         f'LEFT JOIN {USER_TABLE} as E ON A.checker_id = E.user_id '\
-        f' WHERE project_id={data["project_id"]} {where}'
+        f' WHERE A.project_id={data["project_id"]} {where}'
 
     data = execute_query(query, ())
     return data
@@ -719,4 +719,14 @@ def get_checklist_result_attachment(id):
             f'WHERE A.id = %s'
     
     res = execute_query(query, (id,))
+    return res[0] if res else None
+
+def check_project_detail_duplication(project_id, company_id, id = 0):
+    where = ''
+    if id > 1:
+        where = f'AND id != {id}'
+    query = f'SELECT * FROM {PROJECT_DETAIL_TABLE} ' \
+            f'WHERE project_id={project_id} AND company_id={company_id} {where}'
+    
+    res = execute_query(query, ())
     return res[0] if res else None
