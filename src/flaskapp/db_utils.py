@@ -674,7 +674,49 @@ def get_checklist_attachment(id):
     res = execute_query(query, (id))
     return res[0] if res else None
 
+
+
+
 def update_project_detail_status(data):
     query = f'UPDATE {PROJECT_DETAIL_TABLE} SET status=%s WHERE project_id = {data["project_id"]} AND company_id = {data["company_id"]}'
     
     execute_query(query, (data['status']))
+
+
+
+    # 점검 체크리스트 결과
+
+def register_checklist_result_item(data):
+    query = f'DELETE FROM {CHECKLIST_RESULT_TABLE} WHERE category_id={data["id"]}'
+    execute_query(query, ())
+
+    category_id = data['id']
+    query = f'INSERT INTO {CHECKLIST_RESULT_TABLE} (inspection_result, evidence_attachment, inspection_approval, corrective_action, final_result, last_modified_date, \
+                status, corrective_request, inspection_opinion, evidence_attachment_file,  lock, item_id, project_detail_id) VALUES '
+
+    data_list=[]
+    for x in data["data"]:
+        data_list.append(f' ("{x.get("inspection_result", "")}", "{x.get("evidence_attachment", "")}", "{x.get("inspection_approval", "")}", \
+                            "{x.get("corrective_action", "")}", "{x.get("final_result", "")}", "{x.get("last_modified_date", "")}", \
+                            "{x.get("status", "")}", "{x.get("corrective_request", "")}", "{x.get("inspection_opinion", "")}", \
+                            "{x.get("evidence_attachment_file", "")}",  "{x.get("lock", "")}", \
+                            "{x.get("item_id", "")}", "{x.get("project_detail_id", "")}")')
+
+    query += ",".join(data_list)
+            
+    return execute_query(query, ())
+
+def get_checklist_result_items_list(project_detail_id):
+    query = f'SELECT id, A.sequence, A.area, A.domain, A.item, A.detail_item, A.description, A.attachment, A.merged1, A.merged2 , \
+    B.inspection_result, B.evidence_attachment, B.inspection_approval, B.corrective_action, B.final_result, B.last_modified_date, \
+                B.status, B.corrective_request, B.inspection_opinion, B.evidence_attachment_file, B.lock, B.item_id, B.project_detail_id \
+                FROM {CHECKLIST_RESULT_TABLE} as B LEFT JOIN {CHECKLIST_TABLE} as A ON B.item_id = A.id WHERE B.project_detail_id = %s ORDER BY sequence ASC'
+    data = execute_query(query, (project_detail_id,))
+    return data
+
+def get_checklist_result_attachment(id):
+    query = f'SELECT B.created_date, A.attachment FROM {CHECKLIST_RESULT_TABLE} as A LEFT JOIN {CHECKLIST_TABLE} as B ON A.category_id = B.id ' \
+            f'WHERE A.id = %s'
+    
+    res = execute_query(query, (id,))
+    return res[0] if res else None

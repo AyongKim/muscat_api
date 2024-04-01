@@ -7,8 +7,8 @@ H_M_S_FORMATE = '%H:%M:%S'
 
 # ----- Database -----
 DB_USER = 'admin'
-DB_PASSWORD = '1q2w3e4r!'
-DB_ENDPOINT = 'all-class-db-dev.ckp8bphimfd6.ap-northeast-2.rds.amazonaws.com'
+DB_PASSWORD = 'adminmuscat'
+DB_ENDPOINT = 'muscat.cro2kqu2go52.eu-north-1.rds.amazonaws.com'
 DB_PROT = 3306
 
 ALL_CLASS_DB = 'user'
@@ -20,6 +20,7 @@ PROJECT_DETAIL_TABLE = 'project_detail'
 NOTICE_TABLE = 'notice'
 CHECKLIST_TABLE = 'check_list'
 CHECKLIST_INFO_TABLE = 'check_list_info'
+CHECKLIST_RESULT_TABLE = 'check_list_result'
 INQUIRY_TABLE = 'inquiry'
 PERSONAL_CATEGORY_TABLE = 'personal_category'
 PERSONAL_INFO_TABLE = 'personal_info'
