@@ -86,6 +86,7 @@ def register_user(data):
     user_password = hashing_password(data['user_password'])
     user_type = str(data['user_type'])
     register_num = data['register_num'] if 'register_num' in data else ''
+    company_name = data['company_name'] if 'company_name' in data else ''
     company_address = data['company_address'] if 'company_address' in data else ''
     manager_name = data['manager_name'] if 'manager_name' in data else ''
     manager_phone = data['manager_phone'] if 'manager_phone' in data else ''
@@ -96,10 +97,10 @@ def register_user(data):
     admin_name = data['admin_name'] if 'admin_name' in data else ''
     admin_phone = data['admin_phone'] if 'admin_phone' in data else ''
 
-    query = f'INSERT INTO {USER_TABLE} (user_email, user_password, user_type, register_num, company_address, manager_name, manager_phone, manager_depart, manager_grade, other, approval, nickname, admin_name, admin_phone) '\
-            f'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+    query = f'INSERT INTO {USER_TABLE} (user_email, user_password, user_type, register_num,company_name, company_address, manager_name, manager_phone, manager_depart, manager_grade, other, approval, nickname, admin_name, admin_phone) '\
+            f'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
     
-    return execute_query(query, (user_email, user_password, user_type, register_num, company_address, manager_name, manager_phone, manager_depart, manager_grade, other, approval, nickname, admin_name, admin_phone))
+    return execute_query(query, (user_email, user_password, user_type, register_num,company_name, company_address, manager_name, manager_phone, manager_depart, manager_grade, other, approval, nickname, admin_name, admin_phone))
 
 def update_user(data):
     data_list = []
@@ -158,16 +159,12 @@ def get_project_detail(data):
         where += f' AND company_id={data["company_id"]}'
     if 'consignee_id' in data:
         result = get_company_by_user(data['consignee_id'])
-
         if result == None:
             return FAIL_RESPONSE
-        
         data['company_id'] = result[0]
         where = f' AND company_id={data["company_id"]}'
-
-    query = f'SELECT id, create_date, self_check_date, imp_check_date, delay FROM {PROJECT_DETAIL_TABLE} '\
+    query = f'SELECT id, create_date, self_check_date, imp_check_date, delay, state, sub_state, except_type, issue_id,issue_date FROM {PROJECT_DETAIL_TABLE} '\
             f'WHERE project_id={data["project_id"]} {where}'
-
     data = execute_query(query, ())
     return data
 
@@ -217,6 +214,45 @@ def register_company(data):
     query = f'INSERT INTO {COMPANY_TABLE} (register_num, company_name) '\
             f'VALUES (%s, %s)'
     return execute_query(query, (register_num, company_name))
+def get_company_list():
+    query = f'SELECT id, register_num, company_name FROM {COMPANY_TABLE}'
+    data = execute_query(query, ())
+    return data
+
+
+#시스템로그 테이블
+def register_system_log(data):
+    category = data['category']
+    api_name = data['api_name']
+    ip_address = data['ip_address']
+    user_name = data['user_name']
+    user_email = data['user_email']
+    user_type = data['user_type']
+    log_type = data['log_type']
+    log_request = data['log_request']
+    log_response = data['log_response']
+    created_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    query = f'INSERT INTO {SYSTEM_LOG_TABLE} (category, api_name, ip_address, user_name, user_email, user_type, log_type, log_request, log_response, reg_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+    return execute_query(query, (category, api_name, ip_address, user_name, user_email, user_type, log_type, log_request, log_response, created_date))
+
+def get_system_logs():
+    query = f'SELECT id, category, api_name, ip_address,user_name,user_email,user_type,log_type,log_request,log_response, reg_date  FROM {SYSTEM_LOG_TABLE}'
+    data = execute_query(query, ())
+    print(data)
+    formatted_data = [{
+        'author': id, 
+        'category': category,
+        'api_name': api_name,
+        'ip_address': ip_address,
+        'user_name': user_name,
+        'user_email': user_email,
+        'user_type': user_type,
+        'log_type': log_type,
+        'log_request': log_request,
+        'log_response': log_response,
+        'reg_date' : reg_date.strftime('%Y-%m-%d %H:%M:%S')
+    } for id, category, api_name, ip_address,user_name,user_email,user_type,log_type,log_request,log_response,reg_date  in data]
+    return formatted_data 
 
 def update_company(data):
     data_list = []
@@ -306,7 +342,7 @@ def get_project_list(data):
     if 'company_name' in data:
         where += f'AND B.company_name LIKE "%{data["company_name"]}%" '
     
-    query = f'SELECT A.id, A.year, A.name, B.company_name, C.checklist_item, D.personal_category '\
+    query = f'SELECT A.id, A.year, A.name, B.company_name, C.id, C.checklist_item, D.personal_category, A.company_id '\
         f'FROM {PROJECT_TABLE} as A '\
         f'LEFT JOIN {COMPANY_TABLE} as B ON A.company_id = B.id '\
         f'LEFT JOIN {CHECKLIST_TABLE} as C ON A.checklist_id = C.id '\
@@ -414,7 +450,7 @@ def get_notice_list(search_data):
         elif search_data["search_type"] == 3:
             where += f'AND (A.create_by LIKE "%{search_data["keyword"]}%")'
 
-    query = f'SELECT A.id, B.name, A.title, A.create_by, A.create_time, A.views, A.attachment, A.project_id FROM {NOTICE_TABLE} as A LEFT JOIN project as B ON A.project_id=B.id WHERE {where}'
+    query = f'SELECT A.id, B.name, A.title, A.create_by, A.create_time, A.views, A.attachment, A.project_id FROM {NOTICE_TABLE} as A LEFT JOIN project as B ON A.project_id=B.id WHERE {where} ORDER BY A.create_time DESC'
 
     data = execute_query(query, ())
     return data
@@ -446,6 +482,68 @@ def delete_inquiry(str_ids):
     query = f'DELETE FROM {INQUIRY_TABLE} WHERE id in ({str_ids})'
 
     execute_query(query, ())
+
+
+#댓글 관련 
+def register_comment(data):  
+    # 댓글 등록을 위한 쿼리 생성
+    query_insert = f'INSERT INTO {COMMENT_TABLE} (author, date, text, inquiry_id) VALUES (%s, %s, %s, %s)'
+    values = (data['author'], data['date'], data['text'], data['inquiry_id'])
+    # 댓글 등록 쿼리 실행
+    return execute_query(query_insert, values)
+
+
+def get_comments(inquiry_id):
+    query = f'SELECT author, date, text FROM {COMMENT_TABLE} WHERE inquiry_id = %s ORDER BY date ASC'
+    data = execute_query(query, (inquiry_id,))
+    formatted_data = [{
+        'author': author,
+        'date': date.strftime('%Y-%m-%d %H:%M:%S'),
+        'text': text
+    } for author, date, text in data]
+    return formatted_data
+
+
+#메모상세 관련 
+def register_memo_detail(data):  
+    # 메모상세 등록을 위한 쿼리 생성
+    query_insert = f'INSERT INTO {MEMO_DETAIL_TABLE} (author, date, text, memo_id) VALUES (%s, %s, %s, %s)'
+    values = (data['author'], data['date'], data['text'], data['memo_id'])
+    # 메모상세 등록 쿼리 실행
+    return execute_query(query_insert, values)
+
+
+def get_memo_details(memo_id):
+    query = f'SELECT author, date, text FROM {MEMO_DETAIL_TABLE} WHERE memo_id = %s ORDER BY date ASC'
+    data = execute_query(query, (memo_id,))
+    formatted_data = [{
+        'author': author,
+        'date': date.strftime('%Y-%m-%d %H:%M:%S'),
+        'text': text
+    } for author, date, text in data]
+    return formatted_data
+
+#메모 관련 
+def register_memo(data):  
+    # 메모 등록을 위한 쿼리 생성
+    created_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    query_insert = f'INSERT INTO {MEMO_TABLE} (reason, consignor_name, consignee_name, date) VALUES (%s, %s, %s, %s)'
+    values = (data['reason'], data['consignor_name'], data['consignee_name'],created_date)
+    # 메모등록 쿼리 실행
+    return execute_query(query_insert, values)
+
+
+def get_memos():
+    query = f'SELECT reason,consignor_name, consignee_name, date FROM {MEMO_TABLE} ORDER BY date ASC'
+    data = execute_query(query, ())
+    formatted_data = [{
+        'reason': reason,
+        'consignor_name': consignor_name,
+        'consignee_name': consignee_name,
+        'date': date.strftime('%Y-%m-%d %H:%M:%S')
+    } for reason,consignor_name, consignee_name, date in data]
+    return formatted_data
 
 
 #개인정보취급분류관리
@@ -568,20 +666,16 @@ def register_project_detail_multi(data):
         work_name = x['work_name']
         checker_id = x['checker_id']
         check_type = x['check_type']
-
         data_list.append(f' ({project_id}, {company_id}, "{work_name}", {checker_id}, {check_type})')
-
     query += ",".join(data_list)
-            
     return execute_query(query, ())
 
 def get_project_detail_list(data):
-    query = f'SELECT A.id, A.company_id, B.company_name, A.work_name, A.checker_id, C.admin_name, A.check_type '\
+    query = f'SELECT A.id, A.company_id, B.company_name, A.work_name, A.checker_id, C.admin_name, A.check_type, A.create_date, A.self_check_date, A.imp_check_date, A.delay, A.check_schedule, A.status, A.state, A.sub_state, A.except_type, A.except_reason, A.issue_id, A.issue_type, A.issue_date, A.first_check_score, A.imp_check_score, A.first_check_data, A.imp_check_data, A.first_check_admin_temp_data, A.first_check_consignee_temp_data, A.imp_check_admin_temp_data, A.imp_check_consignee_temp_data, A.turn, A.project_attachment,A.request_content '\
         f'FROM {PROJECT_DETAIL_TABLE} as A '\
         f'LEFT JOIN {COMPANY_TABLE} as B ON B.id = A.company_id '\
         f'LEFT JOIN {USER_TABLE} as C ON C.user_id = A.checker_id '\
         f'WHERE project_id = {data["project_id"]}'
-
     data = execute_query(query, ())
     return data
 
@@ -598,11 +692,10 @@ def get_project_detail_status(data):
         data['company_id'] = result[0]
         where += f' AND company_id={data["company_id"]}'
 
-    query = f'SELECT status '\
+    query = f'SELECT * '\
         f'FROM {PROJECT_DETAIL_TABLE} '\
         f'WHERE {where}'
 
-    print(query)
     data = execute_query(query, ())
     return data[0] if data else None
 
@@ -615,8 +708,16 @@ def update_project_detail(data):
     data_list = []
     update_list = []
 
+    if 'self_check_date' in data and data['self_check_date'] == 1:
+        data['self_check_date'] = datetime.now().strftime('%Y-%m-%d')
+
+    if 'imp_check_date' in data and data['imp_check_date'] == 1:
+        data['imp_check_date'] = datetime.now().strftime('%Y-%m-%d')
+    if 'modify_time' in data and data['modify_time'] == 1:
+        data['modify_time'] = datetime.now().strftime('%Y-%m-%d')
+
     for k, v in data.items():
-        if k in ['company_id', 'work_name', 'check_type', 'checker_id', 'delay', 'create_date', 'self_check_date', 'imp_check_date', 'check_schedule']:
+        if k in ['company_id', 'work_name', 'check_type', 'checker_id', 'delay', 'create_date', 'self_check_date', 'imp_check_date', 'check_schedule', 'state', 'sub_state', 'except_type', 'except_reason', 'issue_id', 'issue_type', 'issue_date', 'first_check_score', 'imp_check_score', 'first_check_data', 'imp_check_data', 'first_check_admin_temp_data', 'first_check_consignee_temp_data', 'imp_check_admin_temp_data', 'imp_check_consignee_temp_data', 'project_attachment', 'request_content']:
             update_list.append(f'{k} = %s')
             data_list.append(str(v))
 
@@ -667,23 +768,29 @@ def get_checklist_info_items_list(category_id):
     data = execute_query(query, (category_id,))
     return data
 
+def get_checklist_info_by_project(project_id):
+    query = f'SELECT checklist_id FROM {PROJECT_TABLE} WHERE id={project_id}'
+    res = execute_query(query,())
+
+    query = f'SELECT id, sequence, area, domain, item, detail_item, description, attachment, merged1, merged2 FROM {CHECKLIST_INFO_TABLE} WHERE category_id = %s ORDER BY sequence ASC'
+    data = execute_query(query, (res[0][0],))
+    return data
+
 def get_checklist_attachment(id):
     query = f'SELECT B.created_date, A.attachment FROM {CHECKLIST_INFO_TABLE} as A LEFT JOIN {CHECKLIST_TABLE} as B ON A.category_id = B.id' \
             f'WHERE A.id = %s'
     
-    res = execute_query(query, (id))
+    res = execute_query(query, (id,))
     return res[0] if res else None
-
-
-
 
 def update_project_detail_status(data):
     query = f'UPDATE {PROJECT_DETAIL_TABLE} SET status=%s WHERE project_id = {data["project_id"]} AND company_id = {data["company_id"]}'
     
     execute_query(query, (data['status']))
 
-
-
+    query = f'SELECT id from {PROJECT_DETAIL_TABLE} WHERE project_id = {data["project_id"]} AND company_id = {data["company_id"]}'
+    data = execute_query(query, ())
+    return data[0][0]
     # 점검 체크리스트 결과
 
 def register_checklist_result_item(data):

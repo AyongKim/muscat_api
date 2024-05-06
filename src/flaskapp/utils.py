@@ -50,6 +50,6 @@ def send_mail(recipients, title, message):
     msg.set_content(message)
 
     # 파일 첨부
-    with SMTP_SSL("smtp.gmail.com", 465) as smtp:
-        smtp.login('muscat.check@gmail.com', 'wdgtwldgclgdlroc')
-        smtp.send_message(msg, from_addr='admin@muscat.co.kr')
+    # with SMTP_SSL("smtp.gmail.com", 465) as smtp:
+    #     smtp.login('muscat.check@gmail.com', 'wdgtwldgclgdlroc')
+    #     smtp.send_message(msg, from_addr='admin@muscat.co.kr')

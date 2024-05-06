@@ -11,7 +11,7 @@ DB_PASSWORD = 'adminmuscat'
 DB_ENDPOINT = 'muscat.cro2kqu2go52.eu-north-1.rds.amazonaws.com'
 DB_PROT = 3306
 
-ALL_CLASS_DB = 'user'
+ALL_CLASS_DB = 'muscat4'
 
 USER_TABLE = 'user'
 COMPANY_TABLE = 'company'
@@ -22,8 +22,13 @@ CHECKLIST_TABLE = 'check_list'
 CHECKLIST_INFO_TABLE = 'check_list_info'
 CHECKLIST_RESULT_TABLE = 'check_list_result'
 INQUIRY_TABLE = 'inquiry'
+COMMENT_TABLE = 'comment'
 PERSONAL_CATEGORY_TABLE = 'personal_category'
 PERSONAL_INFO_TABLE = 'personal_info'
+SYSTEM_LOG_TABLE = 'system_log'
+
+MEMO_TABLE = 'memo'
+MEMO_DETAIL_TABLE = 'memo_detail'
  
 
 

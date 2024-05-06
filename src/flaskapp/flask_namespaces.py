@@ -15,9 +15,11 @@ PersonalCategoryNs = Namespace('personal_category', path='/personal_category', d
 PersonalInfoNs = Namespace('personal_info', path='/personal_info', description='개인정보항목관리', decorators=[cross_origin()] )
 ChecklistNs = Namespace('checklist', path='/checklist', description='체크리스트 API',decorators=[cross_origin()])
 ChecklistInfoNs = Namespace('checkinfo', path='/checkinfo', description='체크리스트항목 API',decorators=[cross_origin()])
-
-
-namespaces = [UserNs, CompanyNs, ProjectNs, NoticeNs, ChecklistNs, InquiryNs, PersonalCategoryNs, PersonalInfoNs, ProjectDetailNs, ChecklistInfoNs]
+CommentNs = Namespace('comments', path='/comments', description='문의댓글 API',decorators=[cross_origin()])
+MemoNs = Namespace('memos', path='/memos', description='메모 API',decorators=[cross_origin()])
+MemoDetailNs = Namespace('memo_details', path='/memo_details', description='메모상세 API',decorators=[cross_origin()])
+SystemLogNs = Namespace('system_log', path='/system_log', description='시스템로그 API',decorators=[cross_origin()])
+namespaces = [UserNs, CompanyNs,SystemLogNs, ProjectNs, NoticeNs, ChecklistNs, InquiryNs, CommentNs,MemoNs, MemoDetailNs, PersonalCategoryNs, PersonalInfoNs, ProjectDetailNs, ChecklistInfoNs]
 
 
 def _data_response_model(data_form, ns, model_name, list_form=False, data_key='data', sort_result=False):
@@ -515,7 +517,7 @@ project_detail_register_request_form = {
 
 project_detail_register_request_model = ProjectDetailNs.model('project_detail_register_request_model', project_detail_register_request_form)
 
-
+ 
 user_consignee_data_form = {
                         'user_id': fields.Integer(),
                         'name': fields.String(),
@@ -617,3 +619,94 @@ checklist_info_list_form = {
 
 checklist_info_list_model = ChecklistInfoNs.model('checklist_info_list_model', checklist_info_list_form)
 
+
+
+# 댓글 등록 요청 모델
+comment_register_model = CommentNs.model('CommentRegisterModel', {
+    'inquiry_id': fields.Integer(required=True, description='문의 ID'), 
+    'author': fields.String(required=True, description='댓글 작성자'),
+    'text': fields.String(required=True, description='댓글 내용')
+})
+
+# 댓글 조회 요청 모델
+comment_list_request_model = CommentNs.model('CommentListRequestModel', {
+    'inquiry_id': fields.Integer(required=True, description='문의 ID')
+}) 
+
+# 댓글 목록 응답 모델
+comment_list_model = CommentNs.model('CommentListModel', { 
+    'author': fields.String(description='댓글 작성자'),
+    'date': fields.String(description='댓글 작성일자'),
+    'text': fields.String(description='댓글 내용') 
+})
+
+
+
+# 메모 등록 요청 모델
+memo_detail_register_model = MemoDetailNs.model('MemoDetailRegisterModel', {
+    'memo_id': fields.Integer(required=True, description='메모 ID'), 
+    'author': fields.String(required=True, description='메모 작성자'),
+    'text': fields.String(required=True, description='메모 내용')
+})
+
+# 메모 조회 요청 모델
+memo_detail_request_model = MemoDetailNs.model('MemoDetailRequestModel', {
+    'memo_id': fields.Integer(required=True, description='메모 ID')
+}) 
+
+# 메모 목록 응답 모델
+memo_detail_list_model = MemoDetailNs.model('MemoDetailListModel', { 
+    'author': fields.String(description='메모 작성자'),
+    'date': fields.String(description='메모 작성일자'),
+    'text': fields.String(description='메모 내용') 
+})
+
+
+
+
+system_log_register_model = SystemLogNs.model('system_log', { 
+    'category': fields.String(required=True, description='Category'),
+    'api_name': fields.String(required=True, description='API Name'),
+    'ip_address': fields.String(required=True, description='IP Address'),
+    'user_name': fields.String(required=True, description='User Name'),
+    'user_email': fields.String(required=True, description='User Email'),
+    'user_type': fields.String(required=True, description='User Type'),
+    'log_type': fields.Integer(required=True, description='Log Type'),
+    'log_request': fields.String(required=True, description='Log Request'),
+    'log_response': fields.String(description='Log Response')
+})
+
+
+
+system_log_list_model = SystemLogNs.model('system_log', {
+    'id': fields.Integer(readonly=True),
+    'category': fields.String(required=True, description='Category'),
+    'api_name': fields.String(required=True, description='API Name'),
+    'ip_address': fields.String(required=True, description='IP Address'),
+    'user_name': fields.String(required=True, description='User Name'),
+    'user_email': fields.String(required=True, description='User Email'),
+    'user_type': fields.String(required=True, description='User Type'),
+    'log_type': fields.Integer(required=True, description='Log Type'),
+    'log_request': fields.String(required=True, description='Log Request'),
+    'log_response': fields.String(description='Log Response'),
+    'reg_date' : fields.String(description='reg date'),
+})
+
+
+
+memo_register_model = MemoNs.model('memo register', { 
+    'reason': fields.String(required=True, description='reason'),
+    'consignor_name': fields.String(required=True, description='consignor_name'),
+    'consignee_name': fields.String(required=True, description='consignee_name'),
+    'date': fields.String(required=True, description='date')
+})
+
+
+
+memo_list_model = MemoNs.model('memo list', {
+    'id': fields.Integer(readonly=True),
+    'reason': fields.String(required=True, description='reason'),
+    'consignor_name': fields.String(required=True, description='consignor_name'),
+    'consignee_name': fields.String(required=True, description='consignee_name'), 
+    'date' : fields.String(description='date'),
+})

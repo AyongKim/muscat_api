@@ -1,0 +1,290 @@
+import 'package:flutter/material.dart';
+import 'package:haaab/gen/colors.gen.dart';
+import 'package:haaab/src/helper/size_utils.dart'; 
+import 'package:haaab/src/presentation/ui/terms/component/gradient_progress_indicator.dart'; 
+import 'package:haaab/src/presentation/ui/terms/signup_page4.dart';   
+import 'package:hooks_riverpod/hooks_riverpod.dart'; 
+import '../../di/view_model_provider.dart'; 
+ 
+
+class SignUpPage3 extends ConsumerStatefulWidget {
+  @override
+  _SignUpPage3 createState() => _SignUpPage3();
+}
+
+class _SignUpPage3 extends ConsumerState<SignUpPage3> {   
+  final FocusNode _focusNode = FocusNode();  
+   
+  @override
+  Widget build(BuildContext context ) { 
+
+    return Scaffold(
+      appBar: AppBar( 
+        toolbarHeight: 60.h,
+        backgroundColor: ColorName.primaryColor,
+        leading:IconButton(
+          padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+          icon:  Image.asset("assets/images/icon/arrow_left.png", width: 26.w,)  ,
+          onPressed: (){
+            Navigator.pop(context);
+          },
+        ), 
+        centerTitle: true,
+        elevation: 0.0, 
+      ),
+      backgroundColor: ColorName.backgroundColor,
+      body: _createBody(context, ref),
+      bottomNavigationBar: Container(
+        width: double.infinity,
+        height: 56.h,
+        margin: EdgeInsets.fromLTRB(24.w, 0, 24.w, 44.h),
+         decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12.h),
+              gradient: LinearGradient(
+                colors:  ref.watch(joinViewModelProvider).getHeight.isNotEmpty ?  [Color(0xFFC4CDFF), Color(0xFF7880FF)] : [Color(0xFFE6E9EE), Color(0xFFE6E9EE)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ), 
+            ),
+        child: MaterialButton(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.h)
+          ),
+          padding: const EdgeInsets.all(15),
+          onPressed: () async {   
+            if (ref.watch(joinViewModelProvider).getHeight.isNotEmpty) {
+               Navigator.of(context).push(
+                MaterialPageRoute(
+                  fullscreenDialog: true,
+                  builder: (context) =>   SignUpPage4(),
+                ),
+              );
+            }
+            
+          }, 
+          splashColor: const Color(0x30ffffff),
+          child:   Center(
+              child:   Text(
+                '다음',
+                style: TextStyle(
+                  fontSize: 18.fSize,
+                  color:ref.watch(joinViewModelProvider).getHeight.isEmpty ? Color(0xFFC7CBD1) : Color(0xFFFFFFFF),  
+                  fontFamily: 'PretendardB',
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ), 
+        ),
+      ),
+    );
+  }
+  
+
+
+  Widget _createBody(BuildContext context, WidgetRef ref) {   
+    var tBodyTypeKey =
+        ref.watch(joinViewModelProvider).bodyTypeKey;
+    var tBodyTypeValue =
+        ref.watch(joinViewModelProvider).bodyTypeValue;
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints viewportConstraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints:
+            BoxConstraints(minHeight: viewportConstraints.maxHeight),
+            
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const GradientProgressIndicator(
+                  value: 0.18,  
+                  gradient: LinearGradient(
+                    colors: [Color(0xffC4CDFF), Color(0xff7880FF)], // 그라디언트 색상
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+                Container(
+                  margin:   EdgeInsets.fromLTRB(24.w, 40.h, 0, 0),
+                  width: double.infinity, 
+                  child:   Text("키와 체형을 입력해주세요",
+                    overflow: TextOverflow.clip,
+                    style: TextStyle(
+                      fontFamily: 'PretendardB',
+                        color: Color(0xFF121212),
+                        fontSize: 24.fSize,
+                        fontWeight: FontWeight.bold, 
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+                ), 
+                Container(
+                  margin: EdgeInsets.fromLTRB(20, 38.h, 20, 0),
+                  child: SizedBox(
+                    width: double.infinity, 
+                    child: 
+                    Row(children: [ 
+                      Image(width:20.w, image: AssetImage('assets/images/icon/ruler.png', )),
+                      SizedBox(width: 4.w,),
+                      const Text(
+                            '당신의 키는?',
+                          style: TextStyle(
+                              color: Color(0xFF7880FF),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                              letterSpacing: 0.5),
+                        ),
+                    ],)
+                     
+                  ),
+                ),
+
+                Row(children: [
+                   Container(
+                  width: 169.w ,
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                 
+                  child: TextField(
+                     focusNode: _focusNode,  
+                    style: TextStyle(color: Color(0xFF121212), fontSize: 16.fSize),
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      hintText: "숫자를 입력하세요",
+                      hintStyle: TextStyle(
+                        color: Color(0xFFACB5BD),
+                        fontSize: 16,
+                        fontWeight: FontWeight.normal,
+                      ),
+                     fillColor: _focusNode.hasFocus ? Colors.white : Color(0xffF2F3F5),  
+                      filled: true,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius:  BorderRadius.all(Radius.circular(12.h)),
+                        borderSide: BorderSide(color: Colors.transparent, width: 1.6), 
+                        ), 
+                      border: OutlineInputBorder(
+                        borderRadius:  BorderRadius.all(Radius.circular(12.h)),
+                        borderSide: BorderSide(color: Color(0xFF8A9DFF), width: 1.6), 
+                        ), 
+                    ), 
+                    cursorColor: Color(0x00000000),
+                      onChanged: (text) {
+                      ref.watch(joinViewModelProvider).setHeight(text);
+                      },
+                  ),
+                ),  
+                const Text(
+                      'cm',
+                    style: TextStyle(
+                      fontFamily: 'PretendartR',
+                        color: Color(0xFF121212),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 18,
+                        letterSpacing: 0.5),
+                  ),
+                ],),
+               
+                 
+                 Container( 
+                  margin:   EdgeInsets.fromLTRB(24.w, 40.h, 24.w, 30.h),
+                  child: SizedBox(
+                    width: double.infinity, 
+                    child: 
+                    Row(children: [ 
+                      Image(width:20.w, image: AssetImage('assets/images/icon/body.png', )),
+                      SizedBox(width: 4.w,),
+                      const Text(
+                            '당신의 체형은?',
+                          style: TextStyle(
+                              color: Color(0xFF7880FF),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                              letterSpacing: 0.5),
+                        ),
+                    ],)
+                     
+                  ),
+                ),
+                Container(
+                margin:   EdgeInsets.fromLTRB(20.w, 0.h, 20.w, 24.h),
+                child: Stack(   
+                  children: List.generate(
+                    tBodyTypeValue.length-3,
+                    (index) =>
+                    Container(
+                      margin: EdgeInsets.only( left: 76.w * index),
+                      child: 
+                    Stack( 
+                      children: [ 
+                        index < tBodyTypeValue.length - 1 ? Container( margin: EdgeInsets.only(top: 9.w, left: 12.w ),  height: 6.h,width: 76.w, color: Color(0xffF2F3F5)) : SizedBox(),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            InkWell(
+                            onTap: () {
+                              ref.watch(joinViewModelProvider).setBody(index);
+                            },
+                            child: Container(
+                              margin:EdgeInsets.all(ref.watch(joinViewModelProvider).getBody == index ? 0.w : 4.w),
+                              width: ref.watch(joinViewModelProvider).getBody == index ? 24.w : 16.w,
+                              height:  ref.watch(joinViewModelProvider).getBody == index ? 24.w :  16.w,
+                              decoration: BoxDecoration(
+                                color:  ref.watch(joinViewModelProvider).getBody == index ? Color(0xff7880FF) : Color(0xffF2F3F5),
+                                borderRadius: BorderRadius.circular(60),
+                                boxShadow: [
+                                ref.watch(joinViewModelProvider).getBody == index ? BoxShadow(
+                                  color: Colors.black.withOpacity(0.12),  
+                                  blurRadius: 7,  
+                                  offset:const Offset(0, 2),  
+                                ) : BoxShadow(),
+                              ],
+                              ), 
+                            ),
+                          ),
+                              
+                            SizedBox(height: 10.w),
+                            Text(
+                              tBodyTypeValue[index],
+                              style: TextStyle(
+                                color:  ref.watch(joinViewModelProvider).getBody == index ? Color(0xff7880FF) : Color(0xff80818B),
+                                fontSize: 12,
+                                fontFamily: 'PretendartR', 
+                        fontWeight: FontWeight.w500, 
+                        letterSpacing: 0.5
+                              ),
+                            ),
+                          ],
+                        ),
+                        
+                      ],
+                    ),
+                    ),
+                  ),
+                ),
+              ),
+
+                Center( 
+                    child: Text(
+                      '슬라이더를 움직여보세요',
+                    style: TextStyle(
+                      fontFamily: 'PretendardR',
+                        color: Color(0xFF80818B),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15,
+                        height: 1.4,
+                        letterSpacing: 0.5),
+                  ),
+                 ),
+
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    
+  }
+  
+} 
+ 

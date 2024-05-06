@@ -107,7 +107,7 @@ class Login(Resource):
                         update_data['access_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                         
 
-                        utils.send_mail(result[0], '인증메일 발송', f'로그인을 위한 인증정보입니다.\n아래의 인증번호를 입력하여 인증을 완료해주세요.\n인증메일: {new_code} (유효시간: 3분)')
+                        # utils.send_mail(result[0], '인증메일 발송', f'로그인을 위한 인증정보입니다.\n아래의 인증번호를 입력하여 인증을 완료해주세요.\n인증메일: {new_code} (유효시간: 3분)')
 
                     db_utils.update_user(update_data)
                 else:
@@ -201,7 +201,7 @@ class Update(Resource):
         if 'user_email' in update_data:
             result = db_utils.check_email_duplication_with_id(update_data['user_email'], update_data['user_id'])
 
-            if (result != None):
+            if result is not None:
                 res['result'] = 'fail'
                 res['reason'] = 'Already Existing'
                 res['error_message'] = '이메일이 중복됩니다.'
@@ -217,7 +217,19 @@ class Update(Resource):
         db_utils.update_user(update_data)
         res['result'] = 'success'
         
+        if 'approval' in update_data:
+            if update_data['approval'] == 1:
+                # approval이 1인 경우에만 거부 메일을 보냅니다.
+                utils.send_mail(update_data['user_email'], '인증메일 발송', f'안녕하세요,\n요청하신 회원가입신청이 거부되었음을 안내드립니다. \n더 자세한 내용이 필요하신 경우에는 관련 담당자에게 문의하여 주시기 바랍니다.\n감사합니다.')
+            elif update_data['approval'] == 2 and update_data['user_type'] == 2:
+                # approval이 2이고 user_type이 2인 경우에만 임시 비밀번호 메일을 보냅니다.
+                utils.send_mail(update_data['user_email'], '비밀번호메일 발송', f'안녕하세요,\n임시 비밀번호를 생성해드렸습니다. 로그인 후에 비밀번호를 변경해주시기 바랍니다.\n임시 비밀번호: {generate_random_password()} \n감사합니다')
         return res
+def generate_random_password(length=10):
+    # 비밀번호로 사용할 문자열 생성
+    characters = string.ascii_letters + string.digits + string.punctuation
+    # 랜덤한 문자열을 생성하여 반환
+    return ''.join(random.choice(characters) for _ in range(length))
 
 @UserNs.route('/List')
 class UserList(Resource):
@@ -291,6 +303,11 @@ class ConsignorList(Resource):
                 "self_check_date": x[2].strftime('%Y-%m-%d') if x[2] else '',
                 "imp_check_date": x[3].strftime('%Y-%m-%d') if x[3] else '',
                 "delay": x[4],
+                "state": x[5], #여기 다시 점검 
+                "sub_state": x[6],
+                "except_type": x[7],
+                "issue_id": x[8],
+                "issue_date": x[9]
         }
             
         return data
@@ -372,7 +389,9 @@ class UserApprovalList(Resource):
         data = [{
                 "user_id": x[0],
                 "user_email": x[1],
+                "user_password": x[2], 
                 "user_type": x[3],
+                "company_name": x[4],
                 "register_num": x[5],
                 "company_address": x[6],
                 "manager_name": x[7],
@@ -678,7 +697,7 @@ class ProjectList(Resource):
 
         if 'admin_id' in search_data:
             result = db_utils.get_projects_by_admin(search_data)
-
+            print(result)
             data = [{
                     'project_id': x[0], 
                     'name': x[2],
@@ -689,6 +708,7 @@ class ProjectList(Resource):
                     'self_check_to': x[10].strftime('%Y-%m-%d'),
                     'imp_check_from': x[11].strftime('%Y-%m-%d'),
                     'imp_check_to': x[12].strftime('%Y-%m-%d'),
+                    # 'state': x,
                 }
             for x in result]
             return data
@@ -747,6 +767,9 @@ class ProjectList(Resource):
                     'company_name': x[3],
                     'checklist_id': x[4],
                     'privacy_type': x[5],
+                    'company_id': x[6],
+					'checklist_name': x[5],
+                    'privacy_type': x[6], #??
                 }
             for x in result]
             return data
@@ -1222,7 +1245,6 @@ class ChecklistList(Resource):
                 'created_date': x[3].strftime('%Y-%m-%d %H:%M:%S'),
             }
         for x in result]
-            
         return data
 
 
@@ -1404,16 +1426,40 @@ class ProjectDetailList(Resource):
         if check_response['result'] == FAIL_VALUE:
             return check_response
         
-        result = db_utils.get_project_detail_list(search_data)
-
+        result = db_utils.get_project_detail_list(search_data) 
         data = [{
                 'id': x[0], 
+                'project_id': search_data['project_id'],
                 'company_id': x[1], 
                 'company_name': x[2], 
                 'work_name': x[3], 
                 'checker_id': x[4] ,
                 'checker_name': x[5] ,
                 'check_type': x[6], 
+                'create_date': x[7].strftime('%Y-%m-%d') if x[7] else '', 
+                'self_check_date': x[8].strftime('%Y-%m-%d') if x[9] else '', 
+                'imp_check_date': x[8].strftime('%Y-%m-%d') if x[9] else '', 
+                'delay': x[10], 
+                'check_schedule': x[11], 
+                'status': x[12], 
+                'state': x[13], 
+                'sub_state': x[14], 
+                'except_type': x[15], 
+                'except_reason': x[16], 
+                'issue_id': x[17], 
+                'issue_type': x[18], 
+                'issue_date':   x[19] , 
+                'first_check_score': x[20], 
+                'imp_check_score': x[21], 
+                'first_check_data': x[22], 
+                'imp_check_data': x[23], 
+                'first_check_admin_temp_data': x[24],
+                'first_check_consignee_temp_data': x[25],
+                'imp_check_admin_temp_data': x[26],
+                'imp_check_consignee_temp_data': x[27],
+                'turn': x[28],
+                'project_attachment': x[29],
+                'request_content': x[30],
             }
         for x in result]
             
@@ -1435,8 +1481,42 @@ class ProjectDetailStatus(Resource):
             return check_response
         
         result = db_utils.get_project_detail_status(search_data)
+
+        if result == None:
+            return FAIL_RESPONSE
             
-        return result[0]
+        return {
+            'id': result[0],
+            'project_id': result[1],
+            'company_id': result[2],
+            'work_name': result[3],
+            'checker_id': result[4],
+            'check_type': result[5],
+            'create_date': result[6].strftime('%Y-%m-%d') if result[6] else '',
+            'self_check_date': result[7].strftime('%Y-%m-%d') if result[7] else '',
+            'imp_check_date': result[8].strftime('%Y-%m-%d') if result[8] else '',
+            'delay': result[9],
+            'check_schedule': result[10],
+            'status': result[11],
+            'state': result[12],
+            'sub_state': result[13],
+            'except_type': result[14],
+            'except_reason': result[15],
+            'issue_id': result[16],
+            'issue_type': result[17],
+            'issue_date': result[18].strftime('%Y-%m-%d') if result[18] else '',
+            'first_check_score': result[19],
+            'imp_check_score': result[20],
+            'first_check_data': result[21],
+            'imp_check_data': result[22],
+            'first_check_admin_temp_data': result[23],
+            'first_check_consignee_temp_data': result[24],
+            'imp_check_admin_temp_data': result[25],
+            'imp_check_consignee_temp_data': result[26],
+            'turn': result[27],
+            'project_attachment': result[28],
+            'request_content': result[29],
+        }
 
 @ProjectDetailNs.route('/SetStatus')
 class ProjectDetailSetStatus(Resource):
@@ -1454,8 +1534,27 @@ class ProjectDetailSetStatus(Resource):
             return check_response
         
         result = db_utils.update_project_detail_status(search_data)
+
+        res = db_utils.get_checklist_info_by_project(search_data['project_id'])
+
+        data = [{
+                'id': x[0], 
+                'sequence': x[1], 
+                'area': x[2], 
+                'domain': x[3], 
+                'item': x[4] ,
+                'detail_item': x[5] ,
+                'description': x[6] ,
+                'attachment': x[7] ,
+                'merged1': x[8] ,
+                'merged2': x[9] ,
+            }
+        for x in res]
             
-        return SUCCESS_RESPONSE
+        return {
+            "data": data, 
+            'id': result,
+            "result": "SUCCESS"}
 
 @ProjectDetailNs.route('/CheckSchedule')
 class ProjectDetailCheckSchedule(Resource):
@@ -1533,6 +1632,31 @@ class CompanyUpdate(Resource):
         
         return SUCCESS_RESPONSE
     
+@ProjectDetailNs.route('/Upload')
+class ProjectDetailUpload(Resource):
+    @ProjectDetailNs.expect(ProjectDetailNs.model('project_detail_upload_model',  {  'file': fields.Raw() }))
+    @ProjectDetailNs.response(200, 'SUCCESS', success_response_model)
+    @ProjectDetailNs.response(400, 'FAIL', fail_response_model)
+    def post(self):  
+        register_data: dict = request.form.to_dict() 
+        register_data['attachment'] = '' 
+        if 'file' in request.files:
+            f = request.files['file'] 
+            f.filename = html.unescape(f.filename)
+            if f.filename != '':
+                if not os.path.exists('upload/project'):
+                    os.makedirs('upload/project')
+                f.save('upload/project/' + f.filename)
+                register_data['attachment'] = f.filename  
+        return SUCCESS_RESPONSE
+
+@ProjectDetailNs.route('/Attachment')
+class ProjectDetailttachment(Resource):
+    def get(self):
+        """"""
+        file_name = request.args.get('file_name', '') 
+        return send_file('../upload/project/'+ file_name, as_attachment=True) 
+    
 
 #개인정보항목관리
 @ChecklistInfoNs.route('/Register')
@@ -1553,8 +1677,7 @@ class ChecklistInfoRegister(Resource):
 
         if checklist == None:
             return FAIL_RESPONSE
-
-        timestamp = checklist[2].strftime('%Y%m%d%H%M%S')
+ 
         
         file_len = len(request.files)
 
@@ -1562,9 +1685,9 @@ class ChecklistInfoRegister(Resource):
             f = request.files['file' + str(i+1)] 
             f.filename = html.unescape(f.filename)
             if f.filename != '':
-                if not os.path.exists('upload/checklist/' + timestamp):
-                    os.makedirs('upload/checklist/' + timestamp)
-                f.save('upload/checklist/' + timestamp + '/' + f.filename)
+                if not os.path.exists('upload/checklist'):
+                    os.makedirs('upload/checklist')
+                f.save('upload/checklist/'  + f.filename)
 
         item_data['data'] = json.loads(item_data['data'])
         for x in item_data['data']:
@@ -1607,15 +1730,220 @@ class CheckInfoListByCategory(Resource):
         for x in result]
         return data
     
+@ChecklistInfoNs.route('/List')
+class CheckInfoListByCategory(Resource):
+    @ChecklistInfoNs.expect(personal_info_category_list_request_model)
+    @ChecklistInfoNs.response(200, '성공', personal_info_list_model)
+    @ChecklistInfoNs.response(400, '실패')
+    def post(self):
+        """체크리스트항목 조회"""
+        request_data = request.json
+        category_id = request_data.get('category_id')
+        
+        # 카테고리 ID를 이용한 개인정보 항목 목록 조회
+        result = db_utils.get_checklist_info_items_list(category_id)
+        
+        if result is None or len(result) == 0:
+            return {'message': '해당 카테고리에 개인정보 항목이 없습니다.'}, 404
+        
+        data = [{
+                'id': x[0],
+                'sequence': x[1],
+                'area': x[2],
+                'domain': x[3],
+                'item': x[4],
+                'detail_item': x[5],
+                'description': x[6],
+                'filename': x[7],
+                'merged1': x[8],
+                'merged2': x[9],
+        }
+        for x in result]
+        return data
+    
+@ChecklistInfoNs.route('/ListByProject')
+class CheckInfoListByProject(Resource):
+    @ChecklistInfoNs.expect(personal_info_category_list_request_model)
+    @ChecklistInfoNs.response(200, '성공', personal_info_list_model)
+    @ChecklistInfoNs.response(400, '실패')
+    def post(self):
+        """체크리스트항목 조회"""
+        request_data = request.json
+        project_id = request_data.get('project_id')
+        
+        # 카테고리 ID를 이용한 개인정보 항목 목록 조회
+        result = db_utils.get_checklist_info_by_project(project_id)
+        
+        if result is None or len(result) == 0:
+            return {'message': '해당 카테고리에 개인정보 항목이 없습니다.'}, 404
+        
+        data = [{
+                'id': x[0],
+                'sequence': x[1],
+                'area': x[2],
+                'domain': x[3],
+                'item': x[4],
+                'detail_item': x[5],
+                'description': x[6],
+                'filename': x[7],
+                'merged1': x[8],
+                'merged2': x[9],
+        }
+        for x in result]
+        return data
+
+
+@ChecklistInfoNs.route('/Upload')
+class ProjectDetailUpload(Resource):
+    @ChecklistInfoNs.expect(ChecklistInfoNs.model('check_list_request_model',  {  'file': fields.Raw() }))
+    @ChecklistInfoNs.response(200, 'SUCCESS', success_response_model)
+    @ChecklistInfoNs.response(400, 'FAIL', fail_response_model)
+    def post(self):  
+        register_data: dict = request.form.to_dict() 
+        register_data['attachment'] = '' 
+        if 'file' in request.files:
+            f = request.files['file'] 
+            f.filename = html.unescape(f.filename)
+            if f.filename != '':
+                if not os.path.exists('upload/checklist'):
+                    os.makedirs('upload/checklist')
+                f.save('upload/checklist/' + f.filename)
+                register_data['attachment'] = f.filename  
+        return SUCCESS_RESPONSE
+
+@ChecklistInfoNs.route('/Attachment2')  #보완 요청파일
+class ChecklistAttachment(Resource):
+    def get(self): 
+        file_name = request.args.get('file_name', '') 
+        return send_file('../upload/checklist/'+ file_name, as_attachment=True) 
+    
 @ChecklistInfoNs.route('/Attachment')
 class ChecklistAttachment(Resource):
-    def get(self):
-        """체크리스트 첨부파일"""
-        id = request.args.get('id', '')
+   def get(self): 
+        file_name = request.args.get('file_name', '') 
+        return send_file('../upload/checklist/'+ file_name, as_attachment=True) 
+    
 
-        data = db_utils.get_checklist_attachment(id)
 
-        if data != None and data[1] != '':
-            return send_file('../upload/'+data[0].strftime('%Y%m%d%H%M%S')+'/' + data[1], as_attachment=True)
+
+@CommentNs.route('/Register')  # 댓글 등록 엔드포인트 추가
+class CommentRegister(Resource):
+    @CommentNs.expect(comment_register_model)  # 댓글 등록 요청 모델
+    @CommentNs.response(200, '성공', success_response_model)
+    @CommentNs.response(400, '실패', fail_response_model)
+    def post(self):
+        """새로운 댓글 등록"""
+        comment_data = request.json
         
-        return 'Not exist'
+        # 댓글 등록을 위한 유효성 검사 로직
+        필수_키 = ['inquiry_id', 'author','text']
+        검사_결과 = utils.check_key_value_in_data_is_validate(data=comment_data, keys=필수_키)
+
+        if 검사_결과['result'] == 'FAIL':
+            return 검사_결과
+        
+        # 현재 날짜 및 시간 사용
+        comment_data['date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S') 
+        
+        결과 = db_utils.register_comment(comment_data)  # 댓글 등록을 위한 DB 처리 함수
+        return {'id': 결과, 'result': 'success'}
+
+@CommentNs.route('/List')  # 댓글 조회 엔드포인트 추가
+class CommentList(Resource):
+    @CommentNs.expect(comment_list_request_model)  # 댓글 조회 요청 모델
+    @CommentNs.response(200, '성공', comment_list_model)
+    @CommentNs.response(400, '실패')
+    def post(self):
+        """문의 ID에 의한 댓글 목록 조회"""
+        request_data = request.json
+        inquiry_id = request_data.get('inquiry_id')
+        
+        # 댓글 목록 조회
+        result = db_utils.get_comments(inquiry_id)  # 댓글 조회를 위한 DB 처리 함수
+        
+        if result is None:
+            result = []  # 댓글이 없는 경우 빈 배열 반환
+        
+        return result
+    
+
+
+
+@MemoDetailNs.route('/Register')  # 댓글 등록 엔드포인트 추가
+class MemoDetailRegister(Resource):
+    @MemoDetailNs.expect(memo_detail_register_model)  # 댓글 등록 요청 모델
+    @MemoDetailNs.response(200, '성공', success_response_model)
+    @MemoDetailNs.response(400, '실패', fail_response_model)
+    def post(self): 
+        memo_detail_data = request.json 
+        필수_키 = ['memo_id', 'author','text']
+        검사_결과 = utils.check_key_value_in_data_is_validate(data=memo_detail_data, keys=필수_키) 
+        if 검사_결과['result'] == 'FAIL':
+            return 검사_결과 
+        memo_detail_data['date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  
+        결과 = db_utils.register_memo_detail(memo_detail_data)   
+        return {'id': 결과, 'result': 'success'}
+
+@MemoDetailNs.route('/List')   
+class MemoDetailList(Resource):
+    @MemoDetailNs.expect(memo_detail_request_model) 
+    @MemoDetailNs.response(200, '성공', memo_detail_list_model)
+    @MemoDetailNs.response(400, '실패')
+    def post(self): 
+        request_data = request.json
+        memo_id = request_data.get('memo_id') 
+        result = db_utils.get_memo_details(memo_id)   
+        if result is None:
+            result = []    
+        return result
+    
+
+
+
+@SystemLogNs.route('/Register')
+class SystemLogRegister(Resource):
+    @SystemLogNs.expect(system_log_register_model)
+    @SystemLogNs.response(200, 'SUCCESS', success_response_model)
+    @SystemLogNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """Register a SystemLog"""
+        item_data = request.json  
+        item_data['date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  
+        결과 = db_utils.register_system_log(item_data)
+        return {'id': 결과, 'result': 'success'}
+
+@SystemLogNs.route('/List')
+class SystemLogList(Resource):
+    @SystemLogNs.response(200, 'SUCCESS', system_log_list_model)
+    @SystemLogNs.response(400, 'FAIL', fail_response_model)
+    def post(self):
+        """Get SystemLog list"""
+        # Your logic to retrieve company list
+        # Log the request
+        result = db_utils.get_system_logs()   
+        if result is None:
+            result = []   
+        return result
+    
+
+
+
+@MemoNs.route('/Register')
+class MemoRegister(Resource):
+    @MemoNs.expect(memo_register_model)
+    @MemoNs.response(200, 'SUCCESS', success_response_model)
+    @MemoNs.response(400, 'FAIL', fail_response_model)
+    def post(self): 
+        item_data = request.json  
+        결과 = db_utils.register_memo(item_data)
+        return {'id': 결과, 'result': 'success'}
+
+@MemoNs.route('/List')
+class MemoList(Resource):
+    @MemoNs.response(200, 'SUCCESS', memo_list_model)
+    @MemoNs.response(400, 'FAIL', fail_response_model)
+    def post(self): 
+        result = db_utils.get_memos()   
+        if result is None:
+            result = []   
+        return result
